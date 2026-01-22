@@ -201,3 +201,14 @@ Check the log file (located in `logs/buntool_[SESSION_ID].log`) to verify your s
 3. **Custom Separators**: "A-1" instead of "A1", "A_1", etc.
 4. **Multi-Part Prefixes**: "Chapter-A-1", "Chapter-B-1"
 5. **Auto-Prefix from Metadata**: Derive prefix from PDF metadata or CSV data
+
+---
+
+## Contact & Support
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
+**Copyright © 2026 Ojas Capital Limited** | Based on original work by Tristan Sherliker

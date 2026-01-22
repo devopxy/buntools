@@ -1,11 +1,11 @@
 #!/bin/bash
-# Quick Docker Setup Script for BunTool
+# Quick Docker Setup Script for Court Bundle Tools
 # This script automates Docker setup and deployment
 
 set -e
 
 echo "========================================="
-echo "BunTool Docker Setup Script"
+echo "Court Bundle Tools Docker Setup Script"
 echo "========================================="
 
 # Colors for output

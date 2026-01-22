@@ -8,7 +8,7 @@ __pycache__/
 # This should be the path to your virtual environment directory
 .venv/
 
-# BunTool-specific
+# Court Bundle Tools-specific
 # These directories contain user-uploaded files, logs, and final outputs.
 # Ignoring them is critical for privacy and to keep the repository clean.
 tempfiles/

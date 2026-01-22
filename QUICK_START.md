@@ -3,7 +3,7 @@
 ## 🚀 Getting Started
 
 ### Step 1: Create Your Bundle
-1. Open BunTool at http://127.0.0.1:7001
+1. Open Court Bundle Tools at http://127.0.0.1:7001
 2. Fill in bundle details (Title, Case Name, Claim Number)
 3. Upload your PDF files
 
@@ -152,3 +152,14 @@ After creating your bundle, verify:
 You're all set! The custom alphanumeric numbering feature is ready to use. Select your style, configure your prefix and reset mode, and create your bundle!
 
 **Questions?** Check USAGE_EXAMPLES.md for real-world scenarios.
+
+---
+
+## Contact & Support
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
+**Copyright © 2026 Ojas Capital Limited** | Based on original work by Tristan Sherliker

@@ -1,6 +1,6 @@
-# BunTool - Tools Documentation
+# Court Bundle Tools - Tools Documentation
 
-Complete guide to all tools and features available in BunTool.
+Complete guide to all tools and features available in Court Bundle Tools.
 
 ---
 
@@ -20,7 +20,7 @@ Complete guide to all tools and features available in BunTool.
 
 ## Overview
 
-BunTool provides four main tools for PDF manipulation, plus advanced features for complex document bundling needs:
+Court Bundle Tools provides four main tools for PDF manipulation, plus advanced features for complex document bundling needs:
 
 | Tool | Purpose | URL |
 |------|---------|-----|
@@ -34,7 +34,7 @@ BunTool provides four main tools for PDF manipulation, plus advanced features fo
 ## 1. PDF Bundle Creation Tool
 
 ### Overview
-The main BunTool feature for creating professional court bundles that comply with English Court requirements.
+The main Court Bundle Tools feature for creating professional court bundles that comply with English Court requirements.
 
 ### Features
 - ✅ Merge multiple PDFs into a single bundle
@@ -628,3 +628,20 @@ For more detailed information, see:
 **Status**: Production Ready
 
 All tools are fully tested, documented, and ready for production use.
+
+---
+
+## Contact & Support
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
+## License & Attribution
+
+Licensed under the Mozilla Public License, version 2.0.
+
+**Copyright Information**:
+- **Current Maintainer**: Copyright © 2026 Ojas Capital Limited
+- **Original Author**: Based on original work by Tristan Sherliker and contributors to BunTool

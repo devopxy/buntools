@@ -1,6 +1,6 @@
-# Docker Setup for BunTool
+# Docker Setup for Court Bundle Tools
 
-This document describes how to build and run the BunTool application using Docker.
+This document describes how to build and run the Court Bundle Tools application using Docker.
 
 ## Prerequisites
 
@@ -180,3 +180,14 @@ For issues or questions, refer to the main README.md or check the application lo
 ```bash
 docker logs -f buntool
 ```
+
+---
+
+## Contact
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
+**Copyright © 2026 Ojas Capital Limited** | Based on original work by Tristan Sherliker

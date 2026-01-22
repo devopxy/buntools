@@ -1,11 +1,13 @@
-# BunTool
+# Court Bundle Tools
 <p align="center">
   <img src="static/buntool.webp" width="300" style="center">
 </p>
 
-Automatically make court bundles in seconds. Check out the main instance: [buntool.co.uk](https://buntool.co.uk)
+Automatically make court bundles in seconds.
 
-BunTool is a comprehensive PDF manipulation suite that creates professional court bundles and provides powerful tools for PDF numbering, bookmarking, and merging.
+Court Bundle Tools is a comprehensive PDF manipulation suite that creates professional court bundles and provides powerful tools for PDF numbering, bookmarking, and merging.
+
+**Maintained by Ojas Capital Limited** | Contact: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
 
 ## Features
 
@@ -51,7 +53,7 @@ pip install -r requirements.txt
 
 ### Step 2: Install Fonts
 
-BunTool uses the Charter font, a popular style for legal documents. Copy the font files to ReportLab's fonts folder:
+Court Bundle Tools uses the Charter font, a popular style for legal documents. Copy the font files to ReportLab's fonts folder:
 
 ```bash
 # This command copies the fonts into your virtual environment
@@ -113,7 +115,7 @@ Once running, access at:
 
 ## Tools Overview
 
-BunTool provides four main tools:
+Court Bundle Tools provides four main tools:
 
 ### 1. PDF Bundle Creation Tool
 Create professional court bundles with:
@@ -280,16 +282,19 @@ Contributions are welcome! Please ensure:
 
 ## License
 
-**Copyright © Tristan Sherliker and contributors to BunTool**
-
 Licensed under the Mozilla Public License, version 2.0.
 
 See [LICENSE.md](LICENSE.md) for full license text.
+
+**Copyright Information**:
+- **Current Maintainer**: Copyright © 2026 Ojas Capital Limited
+- **Original Author**: Based on original work by Tristan Sherliker (original BunTool project)
 
 ---
 
 ## Acknowledgments
 
+- Original BunTool project developed by Tristan Sherliker
 - Charter font for legal document formatting
 - ReportLab for PDF generation
 - pikepdf for advanced PDF manipulation
@@ -297,8 +302,13 @@ See [LICENSE.md](LICENSE.md) for full license text.
 
 ---
 
+## Contact
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
 **Version**: 1.0
 **Last Updated**: January 2026
 **Status**: Production Ready
-
-Visit [buntool.co.uk](https://buntool.co.uk) for the hosted version.
