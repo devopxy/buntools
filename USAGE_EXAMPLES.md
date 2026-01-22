@@ -212,3 +212,71 @@ Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
 ---
 
 **Copyright © 2026 Ojas Capital Limited** | Based on original work by Tristan Sherliker
+
+---
+
+# PDF Editor & Pagination Tool - Usage Examples
+
+## PDF Editor Tool Examples
+
+### Example 1: Fix a Scanned Document Order
+**Use Case:** A scan came in with pages out of order and one extra page.
+
+**Steps:**
+1. Open **PDF Editor Tool** (`/pdf_editor`)
+2. Drag pages into the correct order
+3. Delete the unwanted page
+4. Download the edited PDF
+
+**Result:** Clean, correctly ordered document.
+
+---
+
+### Example 2: Rotate Landscape Pages
+**Use Case:** Some pages are sideways after scanning.
+
+**Steps:**
+1. Upload the PDF
+2. Rotate affected pages left/right
+3. Download the edited PDF
+
+**Result:** All pages upright and readable.
+
+---
+
+## PDF Pagination & Page Size Tool Examples
+
+### Example 1: Convert to A4 with Page Numbers
+**Use Case:** A mixed-size PDF needs to be standardized for court filing.
+
+**Configuration:**
+- Page size: **A4**
+- Numbering style: **Page X**
+- Alignment: **Right**
+
+**Result:** All pages resized to A4 with consistent pagination.
+
+---
+
+### Example 2: Legal Size with "X of Y"
+**Use Case:** A Legal-sized document must include total page count.
+
+**Configuration:**
+- Page size: **Legal**
+- Numbering style: **X of Y**
+- Alignment: **Centre**
+
+**Result:** Legal-sized pages with numbering like `3 of 42`.
+
+---
+
+### Example 3: Custom Page Size (mm)
+**Use Case:** A document needs to match a custom print template.
+
+**Configuration:**
+- Page size: **Custom**
+- Width: **180 mm**
+- Height: **250 mm**
+- Numbering style: **Page X of Y**
+
+**Result:** PDF resized to the exact custom dimensions with pagination.

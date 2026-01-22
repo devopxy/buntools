@@ -15,6 +15,8 @@ Court Bundle Tools is a comprehensive PDF manipulation suite that creates profes
 ✅ **Custom Page Numbering** - Add page numbers to single PDFs with advanced alphanumeric options
 ✅ **PDF Bookmarking** - Add hierarchical bookmarks with custom styling and colors
 ✅ **PDF Merging** - Simple merge and reorder functionality
+✅ **PDF Editing** - Reorder, delete, and rotate pages in a single PDF
+✅ **Pagination & Page Size** - Resize pages to standard/custom sizes and add page numbers
 ✅ **Court Compliance** - Output bundles comply with English Court requirements
 ✅ **Advanced Numbering** - Custom alphanumeric numbering (A1, B1, etc.) with page range mapping
 ✅ **Multiple Formats** - Export as PDF or ZIP with metadata
@@ -26,6 +28,8 @@ Court Bundle Tools is a comprehensive PDF manipulation suite that creates profes
 - **PDF Numbering**: http://127.0.0.1:7001/numbering_tool
 - **PDF Bookmarks**: http://127.0.0.1:7001/bookmark_tool
 - **PDF Merger**: http://127.0.0.1:7001/pdf_merger
+- **PDF Editor**: http://127.0.0.1:7001/pdf_editor
+- **PDF Pagination & Size**: http://127.0.0.1:7001/pagination_tool
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 
@@ -108,6 +112,8 @@ Once running, access at:
 - **PDF Numbering Tool**: http://localhost:7001/numbering_tool
 - **Bookmark Tool**: http://localhost:7001/bookmark_tool
 - **PDF Merger**: http://localhost:7001/pdf_merger
+- **PDF Editor**: http://localhost:7001/pdf_editor
+- **PDF Pagination & Size**: http://localhost:7001/pagination_tool
 
 📖 **Docker documentation**: See [DOCKER.md](DOCKER.md)
 
@@ -115,7 +121,7 @@ Once running, access at:
 
 ## Tools Overview
 
-Court Bundle Tools provides four main tools:
+Court Bundle Tools provides six main tools:
 
 ### 1. PDF Bundle Creation Tool
 Create professional court bundles with:
@@ -150,6 +156,16 @@ Add hierarchical bookmarks to PDFs with:
 Simple PDF merge and reorder functionality.
 
 **URL**: `/pdf_merger`
+
+### 5. PDF Editor Tool
+Reorder, delete, and rotate pages within a single PDF.
+
+**URL**: `/pdf_editor`
+
+### 6. PDF Pagination & Page Size Tool
+Resize pages to A4, A3, Legal, Letter, or custom sizes and add page numbers.
+
+**URL**: `/pagination_tool`
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 

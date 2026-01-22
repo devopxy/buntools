@@ -30,7 +30,7 @@
 #       - [ ] the data structure point above will help with this, because then it just becomes a matter of setting variables from the lines of the file.
 
 # PDF manipulation
-from pypdf import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter, Transformation
 from pypdf.annotations import Link
 from pypdf.generic import Fit
 from pikepdf import Pdf, OutlineItem, Dictionary, Name, PdfError
@@ -979,7 +979,7 @@ def create_toc_pdf_reportlab(
         reportlab_pdf.build(elements)
 
 
-def generate_footer_pages_reportlab(filename, num_pages):
+def generate_footer_pages_reportlab(filename, num_pages, page_size=None):
     """
     Generate a PDF with N blank pages, using onFirstPage and onLaterPages callbacks.
 
@@ -991,10 +991,17 @@ def generate_footer_pages_reportlab(filename, num_pages):
         page_size (tuple): Page size, defaults to A4.
     """
     bundle_logger.debug(f"[GFP]Generating {num_pages} blank pages in {filename}")
+    global PAGE_WIDTH
+    global PAGE_HEIGHT
+    original_page_width = PAGE_WIDTH
+    original_page_height = PAGE_HEIGHT
+    if page_size:
+        PAGE_WIDTH, PAGE_HEIGHT = page_size
+
     # Create the document
     doc = SimpleDocTemplate(
         filename,
-        pagesize=A4,
+        pagesize=page_size if page_size else A4,
     )
     # ReportLab protects against infinite loops by checking whether or not a
     # page has content at build time, and terminates after 10 pages without
@@ -1012,6 +1019,43 @@ def generate_footer_pages_reportlab(filename, num_pages):
 
     # Build the document with the footer config:
     doc.build(story, onFirstPage=reportlab_footer_config, onLaterPages=reportlab_footer_config)
+
+    if page_size:
+        PAGE_WIDTH = original_page_width
+        PAGE_HEIGHT = original_page_height
+
+
+def resize_pdf_to_page_size(input_pdf, output_pdf, target_width, target_height):
+    """
+    Resize and center each page onto a new page of the target size.
+
+    Args:
+        input_pdf (str): Path to input PDF.
+        output_pdf (str): Path to output PDF.
+        target_width (float): Page width in points.
+        target_height (float): Page height in points.
+    """
+    reader = PdfReader(input_pdf)
+    writer = PdfWriter()
+
+    for page in reader.pages:
+        src_width = float(page.mediabox.width)
+        src_height = float(page.mediabox.height)
+        if src_width <= 0 or src_height <= 0:
+            continue
+
+        scale = min(target_width / src_width, target_height / src_height)
+        translate_x = (target_width - (src_width * scale)) / 2
+        translate_y = (target_height - (src_height * scale)) / 2
+
+        new_page = writer.add_blank_page(width=target_width, height=target_height)
+        transformation = Transformation().scale(scale).translate(translate_x, translate_y)
+        new_page.merge_transformed_page(page, transformation)
+
+    with open(output_pdf, "wb") as output_handle:
+        writer.write(output_handle)
+
+    return output_pdf
 
 
 def parse_page_range_mapping(mapping_string):
@@ -2203,7 +2247,11 @@ def number_single_pdf(input_pdf, output_pdf, numbering_options):
         page_numbers_pdf_path = os.path.join(bundle_config.temp_dir, "pageNumbers_single.pdf")
         bundle_logger.debug(f"[NSP]Generating page numbers PDF at {page_numbers_pdf_path}")
         
-        generate_footer_pages_reportlab(page_numbers_pdf_path, page_count)
+        generate_footer_pages_reportlab(
+            page_numbers_pdf_path,
+            page_count,
+            page_size=numbering_options.get('page_size')
+        )
         
         if not os.path.exists(page_numbers_pdf_path):
             bundle_logger.error(f"[NSP]Failed to generate page numbers PDF")

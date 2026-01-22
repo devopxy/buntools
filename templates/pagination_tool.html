@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='buntool.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
+    <script src="{{ url_for('static', filename='pagination_tool.js') }}" defer></script>
+    <title>PDF Pagination & Size Tool</title>
+</head>
+<body>
+    <div class="container">
+        <div class="app-subtitle"
+            style="display: flex; align-items: center; justify-content: center; color: #d57782; padding-top: 0;">
+            Page numbering and resizing with
+        </div>
+        <div class="container">
+            <div class="app-header" style="display: flex; align-items: center; justify-content: center;">
+                <h1 class="app-title" style="font-size: 3.5rem; display: flex; align-items: center;">
+                    <span style="color: #ef8c51;">Court Bundle</span>
+                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Court Bundle Tools Logo"
+                        style="width: 80px; height: auto; margin: 0 0.5rem;">
+                    <span style="color: #68b3cd;">Tools</span>
+                </h1>
+            </div>
+            <br>
+        </div>
+
+        <div class="intro-section" style="background-color: #f8fcff; padding: 1rem; text-align: left;">
+            <h2>PDF Pagination & Page Size Tool</h2>
+            <p>
+                Resize pages to a standard size (A4, A3, Legal, Letter) or a custom size, then add page numbers.
+            </p>
+            <p style="margin-bottom: 0;">
+                <a href="{{ url_for('index') }}" style="text-decoration: underline; color: #0066cc;">← Back to Court Bundle Tools
+                    (Bundle Creator)</a>
+            </p>
+        </div>
+
+        <form id="paginationForm" action="/paginate_pdf" method="POST" enctype="multipart/form-data">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-file-pdf-box"></i>
+                    </div>
+                    <h2 class="card-title">Step 1 - Upload PDF File</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="pdf_file">Select PDF file:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required
+                                style="width: 100%; padding: 10px; border: 2px solid #ccc; border-radius: 5px;">
+                        </div>
+                        <small class="form-text text-muted">Maximum file size: 100 MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-resize"></i>
+                    </div>
+                    <h2 class="card-title">Step 2 - Page Size</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="page_size">Target page size:</label>
+                        <select class="form-control" id="page_size" name="page_size">
+                            <option value="A4" selected>A4 (210 x 297 mm)</option>
+                            <option value="A3">A3 (297 x 420 mm)</option>
+                            <option value="LEGAL">Legal (8.5 x 14 in)</option>
+                            <option value="LETTER">Letter (8.5 x 11 in)</option>
+                            <option value="CUSTOM">Custom (mm)</option>
+                        </select>
+                    </div>
+                    <div id="customSizeFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="custom_width_mm">Custom width (mm):</label>
+                            <input type="number" id="custom_width_mm" name="custom_width_mm" min="1" step="0.1"
+                                placeholder="e.g. 210">
+                        </div>
+                        <div class="form-group">
+                            <label for="custom_height_mm">Custom height (mm):</label>
+                            <input type="number" id="custom_height_mm" name="custom_height_mm" min="1" step="0.1"
+                                placeholder="e.g. 297">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-format-list-numbered"></i>
+                    </div>
+                    <h2 class="card-title">Step 3 - Pagination Options</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="footer_font">Font for page numbers:</label>
+                        <select class="form-control" id="footer_font" name="footer_font">
+                            <option value="sans" selected>Sans Serif Helvetica (Default)</option>
+                            <option value="serif">Roman Serif (Times)</option>
+                            <option value="mono">Typewriter (Courier)</option>
+                            <option value="traditional">Charter (Georgia-like)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="page_num_align">Alignment:</label>
+                        <select class="form-control" id="page_num_align" name="page_num_align">
+                            <option value="left">Left</option>
+                            <option value="centre">Centre</option>
+                            <option value="right" selected>Right (Default)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="page_num_style">Numbering style:</label>
+                        <select class="form-control" id="page_num_style" name="page_num_style">
+                            <option value="x">Number only: 1</option>
+                            <option value="x_of_y">Numbers only: 1 of 100</option>
+                            <option value="x_slash_y">Numbers with slash: 1/100</option>
+                            <option value="page_x" selected>Page 1 (default)</option>
+                            <option value="page_x_of_y">Page 1 of 100</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="footer_prefix">Footer prefix (optional):</label>
+                        <input type="text" id="footer_prefix" name="footer_prefix" placeholder="e.g. Exhibit A">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-file-download-outline"></i>
+                    </div>
+                    <h2 class="card-title">Step 4 - Output filename</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="output_filename">Output filename:</label>
+                        <input type="text" id="output_filename" name="output_filename"
+                            placeholder="e.g. document_paginated_A4.pdf">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create paginated PDF</button>
+                    <div id="processingState" style="display: none; margin-top: 1rem; text-align: center;">
+                        <i class="mdi mdi-loading mdi-spin"></i> Processing...
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="errorModal" class="modal" style="display: none;">
+        <div class="modal-content" style="padding: 20px; background: white; border-radius: 8px; max-width: 500px; margin: 20vh auto;">
+            <h3 style="color: #d9534f;">Error</h3>
+            <p id="errorMessage"></p>
+            <button type="button" onclick="closeErrorModal()" class="btn btn-secondary" style="margin-top: 10px;">Close</button>
+        </div>
+    </div>
+</body>
+</html>
