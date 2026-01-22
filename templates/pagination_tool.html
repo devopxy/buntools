@@ -26,9 +26,9 @@
         </div>
 
         <div class="intro-section" style="background-color: #f8fcff; padding: 1rem; text-align: left;">
-            <h2>PDF Pagination & Page Size Tool</h2>
+            <h2>PDF Pagination (Page Size) Tool</h2>
             <p>
-                Resize pages to a standard size (A4, A3, Legal, Letter) or a custom size, then add page numbers.
+                Resize pages to a standard size (A4, A3, Legal, Letter) or a custom size.
             </p>
             <p style="margin-bottom: 0;">
                 <a href="{{ url_for('index') }}" style="text-decoration: underline; color: #0066cc;">← Back to Court Bundle Tools
@@ -92,51 +92,9 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon">
-                        <i class="mdi mdi-format-list-numbered"></i>
-                    </div>
-                    <h2 class="card-title">Step 3 - Pagination Options</h2>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="footer_font">Font for page numbers:</label>
-                        <select class="form-control" id="footer_font" name="footer_font">
-                            <option value="sans" selected>Sans Serif Helvetica (Default)</option>
-                            <option value="serif">Roman Serif (Times)</option>
-                            <option value="mono">Typewriter (Courier)</option>
-                            <option value="traditional">Charter (Georgia-like)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="page_num_align">Alignment:</label>
-                        <select class="form-control" id="page_num_align" name="page_num_align">
-                            <option value="left">Left</option>
-                            <option value="centre">Centre</option>
-                            <option value="right" selected>Right (Default)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="page_num_style">Numbering style:</label>
-                        <select class="form-control" id="page_num_style" name="page_num_style">
-                            <option value="x">Number only: 1</option>
-                            <option value="x_of_y">Numbers only: 1 of 100</option>
-                            <option value="x_slash_y">Numbers with slash: 1/100</option>
-                            <option value="page_x" selected>Page 1 (default)</option>
-                            <option value="page_x_of_y">Page 1 of 100</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="footer_prefix">Footer prefix (optional):</label>
-                        <input type="text" id="footer_prefix" name="footer_prefix" placeholder="e.g. Exhibit A">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">
                         <i class="mdi mdi-file-download-outline"></i>
                     </div>
-                    <h2 class="card-title">Step 4 - Output filename</h2>
+                    <h2 class="card-title">Step 3 - Output filename</h2>
                 </div>
                 <div class="card-body">
                     <div class="form-group">

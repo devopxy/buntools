@@ -16,7 +16,7 @@ Court Bundle Tools is a comprehensive PDF manipulation suite that creates profes
 ✅ **PDF Bookmarking** - Add hierarchical bookmarks with custom styling and colors
 ✅ **PDF Merging** - Simple merge and reorder functionality
 ✅ **PDF Editing** - Reorder, delete, and rotate pages in a single PDF
-✅ **Pagination & Page Size** - Resize pages to standard/custom sizes and add page numbers
+✅ **Pagination & Page Size** - Resize pages to standard/custom sizes
 ✅ **Court Compliance** - Output bundles comply with English Court requirements
 ✅ **Advanced Numbering** - Custom alphanumeric numbering (A1, B1, etc.) with page range mapping
 ✅ **Multiple Formats** - Export as PDF or ZIP with metadata
@@ -163,7 +163,7 @@ Reorder, delete, and rotate pages within a single PDF.
 **URL**: `/pdf_editor`
 
 ### 6. PDF Pagination & Page Size Tool
-Resize pages to A4, A3, Legal, Letter, or custom sizes and add page numbers.
+Resize pages to A4, A3, Legal, Letter, or custom sizes.
 
 **URL**: `/pagination_tool`
 
@@ -214,6 +214,28 @@ Apply different numbering schemes to different page ranges:
 ### System Requirements
 - Python 3.7+
 - 100MB+ disk space
+
+---
+
+## Non-Docker Dependencies (Ubuntu)
+
+### Required System Packages
+- **Python 3 + venv + pip**: `python3`, `python3-venv`, `python3-pip`
+- **pdftk**: required for the Bookmark Tool (`add_bookmarks.sh`)
+
+### Recommended Build Packages
+These help if pip needs to build binary wheels locally (e.g., `pikepdf`):
+- `build-essential`
+- `libqpdf-dev`
+
+### Python Packages
+All Python dependencies are pinned in `requirements.txt`.
+
+### One-Line Installer (Ubuntu)
+Use the included script to install system deps and create a venv:
+```
+./scripts/install_ubuntu_deps.sh
+```
 - For Docker: Docker 20.10+ and Docker Compose 1.29+
 
 ---

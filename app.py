@@ -494,7 +494,7 @@ def merge_pdfs_route():
 
 @app.route('/paginate_pdf', methods=['POST'])
 def paginate_pdf_route():
-    """Resize pages to a target size and add pagination to a single PDF"""
+    """Resize pages to a target size for a single PDF"""
     session_id = str(uuid.uuid4())[:8]
     temp_dir = None
     base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
@@ -550,14 +550,6 @@ def paginate_pdf_route():
         pdf_file.save(input_pdf_path)
         app.logger.info(f"[PS]Saved uploaded PDF to: {input_pdf_path}")
 
-        resized_pdf_path = os.path.join(temp_dir, 'resized.pdf')
-        buntool.resize_pdf_to_page_size(
-            input_pdf_path,
-            resized_pdf_path,
-            target_width,
-            target_height
-        )
-
         output_filename = request.form.get('output_filename', '').strip()
         if not output_filename:
             base_name = os.path.splitext(pdf_file.filename)[0]
@@ -567,28 +559,18 @@ def paginate_pdf_route():
 
         output_pdf_path = os.path.join(temp_dir, secure_filename(output_filename))
 
-        numbering_options = {
-            'session_id': session_id,
-            'page_num_align': request.form.get('page_num_align', 'right'),
-            'footer_font': request.form.get('footer_font', 'sans'),
-            'page_num_style': request.form.get('page_num_style', 'page_x'),
-            'footer_prefix': request.form.get('footer_prefix', ''),
-            'temp_dir': temp_dir,
-            'logs_dir': logs_dir,
-            'page_size': (target_width, target_height)
-        }
-
-        result_pdf_path = buntool.number_single_pdf(
-            resized_pdf_path,
+        result_pdf_path = buntool.resize_pdf_to_page_size(
+            input_pdf_path,
             output_pdf_path,
-            numbering_options
+            target_width,
+            target_height
         )
 
         if not result_pdf_path or not os.path.exists(result_pdf_path):
-            return jsonify({"status": "error", "message": "Error creating paginated PDF"}), 500
+            return jsonify({"status": "error", "message": "Error creating resized PDF"}), 500
 
         return send_file(
-            result_pdf_path,
+            output_pdf_path,
             as_attachment=True,
             download_name=output_filename,
             mimetype='application/pdf'

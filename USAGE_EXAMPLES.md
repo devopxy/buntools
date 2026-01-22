@@ -251,22 +251,18 @@ Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
 
 **Configuration:**
 - Page size: **A4**
-- Numbering style: **Page X**
-- Alignment: **Right**
 
-**Result:** All pages resized to A4 with consistent pagination.
+**Result:** All pages resized to A4 with consistent sizing.
 
 ---
 
 ### Example 2: Legal Size with "X of Y"
-**Use Case:** A Legal-sized document must include total page count.
+**Use Case:** A Legal-sized document must be standardized for printing.
 
 **Configuration:**
 - Page size: **Legal**
-- Numbering style: **X of Y**
-- Alignment: **Centre**
 
-**Result:** Legal-sized pages with numbering like `3 of 42`.
+**Result:** Legal-sized pages with consistent dimensions.
 
 ---
 
@@ -277,6 +273,5 @@ Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
 - Page size: **Custom**
 - Width: **180 mm**
 - Height: **250 mm**
-- Numbering style: **Page X of Y**
 
-**Result:** PDF resized to the exact custom dimensions with pagination.
+**Result:** PDF resized to the exact custom dimensions.

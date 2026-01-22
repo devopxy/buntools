@@ -31,7 +31,7 @@ Court Bundle Tools provides six main tools for PDF manipulation, plus advanced f
 | **PDF Bookmarks** | Add hierarchical bookmarks to PDFs | `/bookmark_tool` |
 | **PDF Merger** | Simple PDF merge and reorder | `/pdf_merger` |
 | **PDF Editor** | Reorder, delete, and rotate pages | `/pdf_editor` |
-| **PDF Pagination & Size** | Resize pages and add pagination | `/pagination_tool` |
+| **PDF Pagination & Size** | Resize pages to standard/custom sizes | `/pagination_tool` |
 
 ---
 
@@ -342,22 +342,19 @@ Edit a single PDF by reordering, deleting, and rotating pages.
 ## 6. PDF Pagination & Page Size Tool
 
 ### Overview
-Resize pages to a standard or custom page size and add page numbers.
+Resize pages to a standard or custom page size.
 
 **URL**: `http://127.0.0.1:7001/pagination_tool`
 
 ### Features
 - ✅ Resize to A4, A3, Legal, or Letter
 - ✅ Custom size in millimeters
-- ✅ Page numbering styles (Page 1, 1/10, 1 of 10, etc.)
-- ✅ Font and alignment control
 
 ### How to Use
 
 1. **Upload PDF**: Select a single PDF file
 2. **Choose target size**: A4, A3, Legal, Letter, or Custom (mm)
-3. **Set numbering options**: Style, font, alignment, optional prefix
-4. **Download**: Click "Create paginated PDF"
+3. **Download**: Click "Create paginated PDF"
 
 ### Notes
 
@@ -561,7 +558,7 @@ Works with:
 | Add navigation bookmarks | PDF Bookmark Tool |
 | Just merge PDFs | PDF Merger Tool |
 | Reorder/rotate/delete pages | PDF Editor Tool |
-| Resize to A4/A3/Legal/Custom and paginate | PDF Pagination & Size Tool |
+| Resize to A4/A3/Legal/Custom | PDF Pagination & Size Tool |
 | Tab divider numbering (A1, B1) | Bundle/Numbering + Custom Alpha |
 | Different numbering per section | Bundle/Numbering + Page Range Mapping |
 
