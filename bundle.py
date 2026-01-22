@@ -57,6 +57,7 @@ import argparse
 import shutil
 import csv
 import logging
+from logging.handlers import RotatingFileHandler
 import zipfile
 import tempfile
 from datetime import datetime
@@ -100,7 +101,12 @@ def configure_logger(session_id=None):
         session_id = datetime.now().strftime("%Y%m%d%H%M%S")  # fallback
     # logs path = buntool_timestamp.log:
     logs_path = os.path.join(logs_dir, f"buntool_{session_id}.log")
-    session_file_handler = logging.FileHandler(logs_path)
+    session_file_handler = RotatingFileHandler(
+        logs_path,
+        maxBytes=100*1024*1024,  # 100MB limit
+        backupCount=3,            # Keep 3 backup files
+        encoding='utf-8'
+    )
     session_file_handler.setLevel(logging.DEBUG)
     session_file_handler.setFormatter(formatter)
     bundle_logger.addHandler(session_file_handler)

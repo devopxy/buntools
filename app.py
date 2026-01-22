@@ -5,6 +5,7 @@ import os
 import bundle as buntool
 import shutil
 import logging
+from logging.handlers import RotatingFileHandler
 import tempfile
 import uuid
 from datetime import datetime
@@ -173,10 +174,15 @@ def number_pdf_route():
         base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
         temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
         os.makedirs(temp_dir, exist_ok=True)
-        
+
         # Set up logging
         logs_path = os.path.join(logs_dir, f'numbering_{session_id}.log')
-        session_file_handler = logging.FileHandler(logs_path)
+        session_file_handler = RotatingFileHandler(
+            logs_path,
+            maxBytes=100*1024*1024,  # 100MB limit
+            backupCount=3,            # Keep 3 backup files
+            encoding='utf-8'
+        )
         session_file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-[NT]: %(message)s')
         session_file_handler.setFormatter(formatter)
@@ -498,9 +504,14 @@ def create_bundle():
         os.makedirs(temp_dir, exist_ok=True)
         app.logger.debug(f"Temporary directory created: {temp_dir}")
 
-        # Add FileHandler for session-specific logging
+        # Add RotatingFileHandler for session-specific logging
         logs_path = os.path.join(logs_dir, f'buntool_{session_id}.log')
-        session_file_handler = logging.FileHandler(logs_path)
+        session_file_handler = RotatingFileHandler(
+            logs_path,
+            maxBytes=100*1024*1024,  # 100MB limit
+            backupCount=3,            # Keep 3 backup files
+            encoding='utf-8'
+        )
         session_file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-[APP]: %(message)s')
         session_file_handler.setFormatter(formatter)
@@ -751,6 +762,16 @@ def download_zip():
         return jsonify({"status": "error", "message": f"Download Error: zip does not exist in expected location."}), 404
 
     return send_file(absolute_path, as_attachment=True)
+
+
+@app.route('/TOOLS.md')
+def serve_tools_documentation():
+    """Serve the TOOLS.md documentation file."""
+    tools_md_path = os.path.join(os.path.dirname(__file__), 'TOOLS.md')
+    if os.path.exists(tools_md_path):
+        return send_file(tools_md_path, mimetype='text/markdown')
+    else:
+        return "Documentation not found", 404
 
 
 if __name__ == '__main__':
