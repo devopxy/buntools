@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Bookmark Tool - BunTool</title>
+    <title>PDF Bookmark Tool - Court Bundle Tools</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='buntool.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
@@ -254,7 +254,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <a href="{{ url_for('index') }}" class="back-link" style="color: white; position: absolute; top: 20px; left: 30px;">← Back to BunTool</a>
+            <a href="{{ url_for('index') }}" class="back-link" style="color: white; position: absolute; top: 20px; left: 30px;">← Back to Court Bundle Tools</a>
             <h1>📚 PDF Bookmark Tool</h1>
             <p>Add custom bookmarks to your PDF files for easy navigation</p>
         </div>
@@ -334,6 +334,12 @@
             <button class="close-error-btn" onclick="closeErrorModal()">Close</button>
         </div>
     </div>
+
+    <footer style="background-color: #f8fafc; padding: 1rem; text-align: center; margin-top: 2rem;">
+        <p style="color: #6b7280; font-size: 0.875rem;">&copy; 2026 Ojas Capital Limited</p>
+        <p style="color: #6b7280; font-size: 0.75rem; font-style: italic;">Based on original work by Tristan Sherliker</p>
+        <p style="color: #6b7280; font-size: 0.875rem;">Contact: <a href="mailto:info@ojascapital.co.uk">info@ojascapital.co.uk</a></p>
+    </footer>
 
     <script src="{{ url_for('static', filename='bookmark_tool.js') }}"></script>
 </body>

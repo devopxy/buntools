@@ -1,6 +1,6 @@
-# BunTool - Tools Documentation
+# Court Bundle Tools - Tools Documentation
 
-Complete guide to all tools and features available in BunTool.
+Complete guide to all tools and features available in Court Bundle Tools.
 
 ---
 
@@ -11,7 +11,9 @@ Complete guide to all tools and features available in BunTool.
 3. [PDF Numbering Tool](#2-pdf-numbering-tool)
 4. [PDF Bookmark Tool](#3-pdf-bookmark-tool)
 5. [PDF Merger Tool](#4-pdf-merger-tool)
-6. [Advanced Features](#advanced-features)
+6. [PDF Editor Tool](#5-pdf-editor-tool)
+7. [PDF Pagination & Page Size Tool](#6-pdf-pagination--page-size-tool)
+8. [Advanced Features](#advanced-features)
    - [Custom Alphanumeric Numbering](#custom-alphanumeric-numbering)
    - [Page Range Mapping](#page-range-mapping)
 7. [Quick Reference](#quick-reference)
@@ -20,7 +22,7 @@ Complete guide to all tools and features available in BunTool.
 
 ## Overview
 
-BunTool provides four main tools for PDF manipulation, plus advanced features for complex document bundling needs:
+Court Bundle Tools provides six main tools for PDF manipulation, plus advanced features for complex document bundling needs:
 
 | Tool | Purpose | URL |
 |------|---------|-----|
@@ -28,13 +30,15 @@ BunTool provides four main tools for PDF manipulation, plus advanced features fo
 | **PDF Numbering** | Add custom page numbers to a single PDF | `/numbering_tool` |
 | **PDF Bookmarks** | Add hierarchical bookmarks to PDFs | `/bookmark_tool` |
 | **PDF Merger** | Simple PDF merge and reorder | `/pdf_merger` |
+| **PDF Editor** | Reorder, delete, and rotate pages | `/pdf_editor` |
+| **PDF Pagination & Size** | Resize pages to standard/custom sizes | `/pagination_tool` |
 
 ---
 
 ## 1. PDF Bundle Creation Tool
 
 ### Overview
-The main BunTool feature for creating professional court bundles that comply with English Court requirements.
+The main Court Bundle Tools feature for creating professional court bundles that comply with English Court requirements.
 
 ### Features
 - ✅ Merge multiple PDFs into a single bundle
@@ -305,6 +309,60 @@ Simple tool for merging and reordering PDF files.
 
 ---
 
+## 5. PDF Editor Tool
+
+### Overview
+Edit a single PDF by reordering, deleting, and rotating pages.
+
+**URL**: `http://127.0.0.1:7001/pdf_editor`
+
+### Features
+- ✅ Drag-and-drop reordering
+- ✅ Delete pages
+- ✅ Rotate pages left/right
+- ✅ Page thumbnails preview
+- ✅ Fast download of edited PDF
+
+### How to Use
+
+1. **Upload PDF**: Select a single PDF file
+2. **Reorder pages**: Drag page cards to the desired order
+3. **Rotate**: Use rotate buttons to adjust orientation
+4. **Delete**: Remove any page you don't want
+5. **Download**: Click "Apply edits and download"
+
+### When to Use
+
+- Clean up scanned bundles
+- Reorder exhibits
+- Fix landscape pages
+
+---
+
+## 6. PDF Pagination & Page Size Tool
+
+### Overview
+Resize pages to a standard or custom page size.
+
+**URL**: `http://127.0.0.1:7001/pagination_tool`
+
+### Features
+- ✅ Resize to A4, A3, Legal, or Letter
+- ✅ Custom size in millimeters
+
+### How to Use
+
+1. **Upload PDF**: Select a single PDF file
+2. **Choose target size**: A4, A3, Legal, Letter, or Custom (mm)
+3. **Download**: Click "Create paginated PDF"
+
+### Notes
+
+- Pages are scaled to fit the target size and centered.
+- Output file is a new PDF; original file is unchanged.
+
+---
+
 ## Advanced Features
 
 ### Custom Alphanumeric Numbering
@@ -499,6 +557,8 @@ Works with:
 | Add page numbers to single PDF | PDF Numbering Tool |
 | Add navigation bookmarks | PDF Bookmark Tool |
 | Just merge PDFs | PDF Merger Tool |
+| Reorder/rotate/delete pages | PDF Editor Tool |
+| Resize to A4/A3/Legal/Custom | PDF Pagination & Size Tool |
 | Tab divider numbering (A1, B1) | Bundle/Numbering + Custom Alpha |
 | Different numbering per section | Bundle/Numbering + Page Range Mapping |
 
@@ -628,3 +688,20 @@ For more detailed information, see:
 **Status**: Production Ready
 
 All tools are fully tested, documented, and ready for production use.
+
+---
+
+## Contact & Support
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
+## License & Attribution
+
+Licensed under the Mozilla Public License, version 2.0.
+
+**Copyright Information**:
+- **Current Maintainer**: Copyright © 2026 Ojas Capital Limited
+- **Original Author**: Based on original work by Tristan Sherliker and contributors to BunTool

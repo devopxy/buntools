@@ -388,6 +388,18 @@ def pdf_merger():
     return render_template('pdf_merger_tool.html')
 
 
+@app.route('/pdf_editor')
+def pdf_editor():
+    """Display the PDF editor tool interface"""
+    return render_template('pdf_editor_tool.html')
+
+
+@app.route('/pagination_tool')
+def pagination_tool():
+    """Display the PDF pagination and resizing tool interface"""
+    return render_template('pagination_tool.html')
+
+
 @app.route('/merge_pdfs', methods=['POST'])
 def merge_pdfs_route():
     """Process and merge multiple PDF files"""
@@ -478,6 +490,213 @@ def merge_pdfs_route():
                 app.logger.debug(f"[PM]Cleaned up temporary directory: {temp_dir}")
         except Exception as e:
             app.logger.warning(f"[PM]Could not clean up temporary files: {str(e)}")
+
+
+@app.route('/paginate_pdf', methods=['POST'])
+def paginate_pdf_route():
+    """Resize pages to a target size for a single PDF"""
+    session_id = str(uuid.uuid4())[:8]
+    temp_dir = None
+    base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
+
+    try:
+        if 'pdf_file' not in request.files:
+            return jsonify({"status": "error", "message": "No PDF file provided"}), 400
+
+        pdf_file = request.files['pdf_file']
+        if not pdf_file or pdf_file.filename == '':
+            return jsonify({"status": "error", "message": "No PDF file selected"}), 400
+
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({"status": "error", "message": "File must be a PDF"}), 400
+
+        page_size = request.form.get('page_size', 'A4')
+        custom_width_mm = request.form.get('custom_width_mm', '').strip()
+        custom_height_mm = request.form.get('custom_height_mm', '').strip()
+
+        size_map = {
+            'A4': (595.0, 842.0),
+            'A3': (842.0, 1191.0),
+            'LEGAL': (612.0, 1008.0),
+            'LETTER': (612.0, 792.0),
+        }
+
+        if page_size == 'CUSTOM':
+            try:
+                width_mm = float(custom_width_mm)
+                height_mm = float(custom_height_mm)
+            except ValueError:
+                return jsonify({"status": "error", "message": "Custom size must be numeric"}), 400
+
+            if width_mm <= 0 or height_mm <= 0:
+                return jsonify({"status": "error", "message": "Custom size must be positive"}), 400
+
+            points_per_mm = 72.0 / 25.4
+            target_width = width_mm * points_per_mm
+            target_height = height_mm * points_per_mm
+            size_label = "custom"
+        else:
+            size_key = page_size.upper()
+            if size_key not in size_map:
+                return jsonify({"status": "error", "message": "Invalid page size"}), 400
+            target_width, target_height = size_map[size_key]
+            size_label = size_key.lower()
+
+        temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        app.logger.debug(f"[PS]Created temp directory: {temp_dir}")
+
+        input_pdf_path = os.path.join(temp_dir, secure_filename(pdf_file.filename))
+        pdf_file.save(input_pdf_path)
+        app.logger.info(f"[PS]Saved uploaded PDF to: {input_pdf_path}")
+
+        output_filename = request.form.get('output_filename', '').strip()
+        if not output_filename:
+            base_name = os.path.splitext(pdf_file.filename)[0]
+            output_filename = f"{base_name}_paginated_{size_label}.pdf"
+        if not output_filename.lower().endswith('.pdf'):
+            output_filename += '.pdf'
+
+        output_pdf_path = os.path.join(temp_dir, secure_filename(output_filename))
+
+        result_pdf_path = buntool.resize_pdf_to_page_size(
+            input_pdf_path,
+            output_pdf_path,
+            target_width,
+            target_height
+        )
+
+        if not result_pdf_path or not os.path.exists(result_pdf_path):
+            return jsonify({"status": "error", "message": "Error creating resized PDF"}), 500
+
+        return send_file(
+            output_pdf_path,
+            as_attachment=True,
+            download_name=output_filename,
+            mimetype='application/pdf'
+        )
+
+    except Exception as e:
+        app.logger.error(f"[PS]Unexpected error in paginate_pdf_route: {str(e)}")
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+    finally:
+        try:
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir)
+                app.logger.debug(f"[PS]Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            app.logger.warning(f"[PS]Could not clean up temporary files: {str(e)}")
+
+
+@app.route('/edit_pdf', methods=['POST'])
+def edit_pdf_route():
+    """Process a single PDF file with reordering, deletion, and rotation edits"""
+    session_id = str(uuid.uuid4())[:8]
+    temp_dir = None
+    base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
+
+    try:
+        if 'pdf_file' not in request.files:
+            return jsonify({"status": "error", "message": "No PDF file provided"}), 400
+
+        pdf_file = request.files['pdf_file']
+        if not pdf_file or pdf_file.filename == '':
+            return jsonify({"status": "error", "message": "No PDF file selected"}), 400
+
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({"status": "error", "message": "File must be a PDF"}), 400
+
+        temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        app.logger.debug(f"[PE]Created temp directory: {temp_dir}")
+
+        input_pdf_path = os.path.join(temp_dir, secure_filename(pdf_file.filename))
+        pdf_file.save(input_pdf_path)
+        app.logger.info(f"[PE]Saved uploaded PDF to: {input_pdf_path}")
+
+        import json
+        edits_json = request.form.get('edits_json', '{}')
+        try:
+            edits = json.loads(edits_json)
+        except Exception as e:
+            app.logger.error(f"[PE]Invalid edits JSON: {str(e)}")
+            return jsonify({"status": "error", "message": "Invalid edit data"}), 400
+
+        page_order = edits.get('page_order', [])
+        rotations = edits.get('rotations', {})
+
+        if not isinstance(page_order, list) or not page_order:
+            return jsonify({"status": "error", "message": "No page order supplied"}), 400
+
+        # Normalize rotations keys to int
+        try:
+            rotations_map = {int(k): int(v) for k, v in rotations.items()}
+        except Exception:
+            return jsonify({"status": "error", "message": "Invalid rotation data"}), 400
+
+        from pikepdf import Pdf
+
+        with Pdf.open(input_pdf_path) as src_pdf:
+            total_pages = len(src_pdf.pages)
+            if any((not isinstance(p, int)) for p in page_order):
+                return jsonify({"status": "error", "message": "Invalid page order"}), 400
+
+            # Enforce unique page numbers within range
+            if len(set(page_order)) != len(page_order):
+                return jsonify({"status": "error", "message": "Duplicate pages in order"}), 400
+
+            for page_num in page_order:
+                if page_num < 1 or page_num > total_pages:
+                    return jsonify({"status": "error", "message": "Page out of range"}), 400
+
+            for page_num, rotation in rotations_map.items():
+                if page_num < 1 or page_num > total_pages:
+                    return jsonify({"status": "error", "message": "Rotation page out of range"}), 400
+                if rotation % 90 != 0:
+                    return jsonify({"status": "error", "message": "Rotation must be a multiple of 90"}), 400
+
+            output_filename = request.form.get('output_filename', '').strip()
+            if not output_filename:
+                base_name = os.path.splitext(pdf_file.filename)[0]
+                output_filename = f"{base_name}_edited.pdf"
+            if not output_filename.lower().endswith('.pdf'):
+                output_filename += '.pdf'
+
+            output_pdf_path = os.path.join(temp_dir, secure_filename(output_filename))
+
+            edited_pdf = Pdf.new()
+            for page_num in page_order:
+                page = src_pdf.pages[page_num - 1]
+                rotation = rotations_map.get(page_num, 0)
+                if rotation:
+                    current_rotation = int(page.get('/Rotate', 0))
+                    page.Rotate = (current_rotation + rotation) % 360
+                edited_pdf.pages.append(page)
+
+            edited_pdf.save(output_pdf_path)
+            app.logger.info(f"[PE]Saved edited PDF to: {output_pdf_path}")
+
+        return send_file(
+            output_pdf_path,
+            as_attachment=True,
+            download_name=output_filename,
+            mimetype='application/pdf'
+        )
+
+    except Exception as e:
+        app.logger.error(f"[PE]Unexpected error in edit_pdf_route: {str(e)}")
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+    finally:
+        try:
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir)
+                app.logger.debug(f"[PE]Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            app.logger.warning(f"[PE]Could not clean up temporary files: {str(e)}")
 
 
 @app.route('/create_bundle', methods=['GET', 'POST'])

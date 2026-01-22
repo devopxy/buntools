@@ -1,11 +1,13 @@
-# BunTool
+# Court Bundle Tools
 <p align="center">
   <img src="static/buntool.webp" width="300" style="center">
 </p>
 
-Automatically make court bundles in seconds. Check out the main instance: [buntool.co.uk](https://buntool.co.uk)
+Automatically make court bundles in seconds.
 
-BunTool is a comprehensive PDF manipulation suite that creates professional court bundles and provides powerful tools for PDF numbering, bookmarking, and merging.
+Court Bundle Tools is a comprehensive PDF manipulation suite that creates professional court bundles and provides powerful tools for PDF numbering, bookmarking, and merging.
+
+**Maintained by Ojas Capital Limited** | Contact: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
 
 ## Features
 
@@ -13,6 +15,8 @@ BunTool is a comprehensive PDF manipulation suite that creates professional cour
 ✅ **Custom Page Numbering** - Add page numbers to single PDFs with advanced alphanumeric options
 ✅ **PDF Bookmarking** - Add hierarchical bookmarks with custom styling and colors
 ✅ **PDF Merging** - Simple merge and reorder functionality
+✅ **PDF Editing** - Reorder, delete, and rotate pages in a single PDF
+✅ **Pagination & Page Size** - Resize pages to standard/custom sizes
 ✅ **Court Compliance** - Output bundles comply with English Court requirements
 ✅ **Advanced Numbering** - Custom alphanumeric numbering (A1, B1, etc.) with page range mapping
 ✅ **Multiple Formats** - Export as PDF or ZIP with metadata
@@ -24,6 +28,8 @@ BunTool is a comprehensive PDF manipulation suite that creates professional cour
 - **PDF Numbering**: http://127.0.0.1:7001/numbering_tool
 - **PDF Bookmarks**: http://127.0.0.1:7001/bookmark_tool
 - **PDF Merger**: http://127.0.0.1:7001/pdf_merger
+- **PDF Editor**: http://127.0.0.1:7001/pdf_editor
+- **PDF Pagination & Size**: http://127.0.0.1:7001/pagination_tool
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 
@@ -51,7 +57,7 @@ pip install -r requirements.txt
 
 ### Step 2: Install Fonts
 
-BunTool uses the Charter font, a popular style for legal documents. Copy the font files to ReportLab's fonts folder:
+Court Bundle Tools uses the Charter font, a popular style for legal documents. Copy the font files to ReportLab's fonts folder:
 
 ```bash
 # This command copies the fonts into your virtual environment
@@ -106,6 +112,8 @@ Once running, access at:
 - **PDF Numbering Tool**: http://localhost:7001/numbering_tool
 - **Bookmark Tool**: http://localhost:7001/bookmark_tool
 - **PDF Merger**: http://localhost:7001/pdf_merger
+- **PDF Editor**: http://localhost:7001/pdf_editor
+- **PDF Pagination & Size**: http://localhost:7001/pagination_tool
 
 📖 **Docker documentation**: See [DOCKER.md](DOCKER.md)
 
@@ -113,7 +121,7 @@ Once running, access at:
 
 ## Tools Overview
 
-BunTool provides four main tools:
+Court Bundle Tools provides six main tools:
 
 ### 1. PDF Bundle Creation Tool
 Create professional court bundles with:
@@ -148,6 +156,16 @@ Add hierarchical bookmarks to PDFs with:
 Simple PDF merge and reorder functionality.
 
 **URL**: `/pdf_merger`
+
+### 5. PDF Editor Tool
+Reorder, delete, and rotate pages within a single PDF.
+
+**URL**: `/pdf_editor`
+
+### 6. PDF Pagination & Page Size Tool
+Resize pages to A4, A3, Legal, Letter, or custom sizes.
+
+**URL**: `/pagination_tool`
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 
@@ -196,6 +214,28 @@ Apply different numbering schemes to different page ranges:
 ### System Requirements
 - Python 3.7+
 - 100MB+ disk space
+
+---
+
+## Non-Docker Dependencies (Ubuntu)
+
+### Required System Packages
+- **Python 3 + venv + pip**: `python3`, `python3-venv`, `python3-pip`
+- **pdftk**: required for the Bookmark Tool (`add_bookmarks.sh`)
+
+### Recommended Build Packages
+These help if pip needs to build binary wheels locally (e.g., `pikepdf`):
+- `build-essential`
+- `libqpdf-dev`
+
+### Python Packages
+All Python dependencies are pinned in `requirements.txt`.
+
+### One-Line Installer (Ubuntu)
+Use the included script to install system deps and create a venv:
+```
+./scripts/install_ubuntu_deps.sh
+```
 - For Docker: Docker 20.10+ and Docker Compose 1.29+
 
 ---
@@ -280,16 +320,19 @@ Contributions are welcome! Please ensure:
 
 ## License
 
-**Copyright © Tristan Sherliker and contributors to BunTool**
-
 Licensed under the Mozilla Public License, version 2.0.
 
 See [LICENSE.md](LICENSE.md) for full license text.
+
+**Copyright Information**:
+- **Current Maintainer**: Copyright © 2026 Ojas Capital Limited
+- **Original Author**: Based on original work by Tristan Sherliker (original BunTool project)
 
 ---
 
 ## Acknowledgments
 
+- Original BunTool project developed by Tristan Sherliker
 - Charter font for legal document formatting
 - ReportLab for PDF generation
 - pikepdf for advanced PDF manipulation
@@ -297,8 +340,13 @@ See [LICENSE.md](LICENSE.md) for full license text.
 
 ---
 
+## Contact
+
+**Ojas Capital Limited**
+Email: [info@ojascapital.co.uk](mailto:info@ojascapital.co.uk)
+
+---
+
 **Version**: 1.0
 **Last Updated**: January 2026
 **Status**: Production Ready
-
-Visit [buntool.co.uk](https://buntool.co.uk) for the hosted version.

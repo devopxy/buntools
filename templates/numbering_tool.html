@@ -18,11 +18,11 @@
         </div>
         <div class="container">
             <div class="app-header" style="display: flex; align-items: center; justify-content: center;">
-                <h1 class="app-title" style="font-size: 7.5rem; display: flex; align-items: center;">
-                    <span style="color: #ef8c51;">Bun</span>
-                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Bun tool Logo"
-                        style="width: 120px; height: auto; margin: 0 0.5rem;">
-                    <span style="color: #68b3cd;">Tool</span>
+                <h1 class="app-title" style="font-size: 3.5rem; display: flex; align-items: center;">
+                    <span style="color: #ef8c51;">Court Bundle</span>
+                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Court Bundle Tools Logo"
+                        style="width: 80px; height: auto; margin: 0 0.5rem;">
+                    <span style="color: #68b3cd;">Tools</span>
                 </h1>
             </div>
             <br>
@@ -35,7 +35,7 @@
                 advanced options like page range mapping.
             </p>
             <p style="margin-bottom: 0;">
-                <a href="{{ url_for('index') }}" style="text-decoration: underline; color: #0066cc;">← Back to BunTool
+                <a href="{{ url_for('index') }}" style="text-decoration: underline; color: #0066cc;">← Back to Court Bundle Tools
                     (Bundle Creator)</a>
             </p>
         </div>
@@ -252,7 +252,7 @@
             <h2>About this tool</h2>
             <p>
                 This tool adds custom page numbers to any PDF file. It uses the same powerful page numbering system
-                as BunTool, including support for custom alphanumeric numbering and page range mapping.
+                as Court Bundle Tools, including support for custom alphanumeric numbering and page range mapping.
             </p>
             <p>
                 <strong>Features:</strong>
@@ -272,7 +272,7 @@
     </div>
 
     <!-- Error modal -->
-    <div id="errorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    <div id="errorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
         <div style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px;">
             <h3 style="color: #d57782; margin-top: 0;">Error</h3>
@@ -280,6 +280,12 @@
             <button onclick="document.getElementById('errorModal').style.display='none'; location.reload();" style="background-color: #d57782; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">Close and Retry</button>
         </div>
     </div>
+
+    <footer style="background-color: #f8fafc; padding: 1rem; text-align: center; margin-top: 2rem;">
+        <p style="color: #6b7280; font-size: 0.875rem;">&copy; 2026 Ojas Capital Limited</p>
+        <p style="color: #6b7280; font-size: 0.75rem; font-style: italic;">Based on original work by Tristan Sherliker</p>
+        <p style="color: #6b7280; font-size: 0.875rem;">Contact: <a href="mailto:info@ojascapital.co.uk">info@ojascapital.co.uk</a></p>
+    </footer>
 
 </body>
 

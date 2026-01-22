@@ -10,31 +10,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="{{ url_for('static', filename='buntool.js') }}" defer></script>
-    <title>BunTool</title>
+    <title>Court Bundle Tools</title>
 </head>
 
 <body>
     <div class="container">
         <div class="app-subtitle"
-            style="display: flex; align-items: center; justify-content: center; color: #d57782; padding-top: 0;">simple
-            bundling with</span>
+            style="display: flex; align-items: center; justify-content: center; color: #d57782; padding-top: 0;">Professional
+            PDF bundling with</span>
         </div>
         <div class="container">
             <div class="app-header" style="display: flex; align-items: center; justify-content: center;">
-                <h1 class="app-title" style="font-size: 7.5rem; display: flex; align-items: center;">
-                    <span style="color: #ef8c51;">Bun</span>
-                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Bun tool Logo"
-                        style="width: 120px; height: auto; margin: 0 0.5rem;">
-                    <span style="color: #68b3cd;">Tool</span>
+                <h1 class="app-title" style="font-size: 3.5rem; display: flex; align-items: center;">
+                    <span style="color: #ef8c51;">Court Bundle</span>
+                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Court Bundle Tools Logo"
+                        style="width: 80px; height: auto; margin: 0 0.5rem;">
+                    <span style="color: #68b3cd;">Tools</span>
                 </h1>
             </div>
             <br>
         </div>
 
         <div class="intro-section" style="background-color: #f8fcff; padding: 1rem; text-align: left;">
-            <h2> Welcome to BunTool! </h2>
-            <p> 
-                BunTool is a simple tool for creating PDF bundles from several PDF files. 
+            <h2> Welcome to Court Bundle Tools! </h2>
+            <p>
+                Court Bundle Tools is a comprehensive tool for creating PDF bundles from several PDF files. 
             </p>
             <p>
                 Written by a lawyer for use in court, it's perfect for 
@@ -55,6 +55,14 @@
             <p style="margin-bottom: 0;">
                 <strong>📑 Tip:</strong> Just want to merge and arrange PDF files?
                 <a href="{{ url_for('pdf_merger') }}" style="text-decoration: underline; color: #0066cc;">Use the PDF Merger Tool →</a>
+            </p>
+            <p style="margin-bottom: 0;">
+                <strong>🛠️ Tip:</strong> Need to reorder, delete, or rotate pages in a PDF?
+                <a href="{{ url_for('pdf_editor') }}" style="text-decoration: underline; color: #0066cc;">Use the PDF Editor Tool →</a>
+            </p>
+            <p style="margin-bottom: 0;">
+                <strong>📐 Tip:</strong> Need to resize pages to a standard or custom size?
+                <a href="{{ url_for('pagination_tool') }}" style="text-decoration: underline; color: #0066cc;">Use the PDF Pagination & Size Tool →</a>
             </p>
             <p style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
                 <strong>📖 Documentation:</strong> Need help or want to learn more?
@@ -101,7 +109,7 @@
                 <p>Upload the individual PDFs to be combined into your bundle.</p>
                 <p>Sort your index by clicking the table headings, or drag to reorder in the table.</p>
                 <p>Click the button to add section markers.</p>
-                <p>Check and edit the titles and dates for the index: BunTool will suggest some automatically. </p>
+                <p>Check and edit the titles and dates for the index: Court Bundle Tools will suggest some automatically. </p>
 
                 <div id="dropZone" class="upload-zone" style="display: block;">
                     <i class="mdi mdi-upload upload-icon" style="color: #d57782;"></i>
@@ -452,11 +460,11 @@
             <div class="card">
             <h2>Free and private</h2>
             <p>
-                BunTool is free, open-source, and private. All files are processed on a private server and are automatically removed as soon as as your bundle is created. The bundles themselves are deleted within a few hours of creation.
+                Court Bundle Tools is free, open-source, and private. All files are processed on a private server and are automatically removed as soon as as your bundle is created. The bundles themselves are deleted within a few hours of creation.
                 Some logs are stored, including: the number of files uploaded, the number of pages in each file, the number of bundles created, and any text input for the index. This is all just to make sure the app is functioning correctly, and diagnose any errors. Logs are deleted regularly, though less often than the main data itself.
-                BunTool also logs the type of browser you're using. You can review the code on <a href="https://github.com/TrisSherliker/buntool">GitHub</a>. As with most open-source tools, it is free to use but comes with no warranty.</p>
+                Court Bundle Tools also logs the type of browser you're using. As with most open-source tools, it is free to use but comes with no warranty.</p>
                 <p>
-                    If you find this useful, have any suggestions, or need help with any errors, I'd like to hear from you. You can contact me <a href="mailto:tris@sherliker.net">by email here</a>. 
+                    If you find this useful, have any suggestions, or need help with any errors, please contact us at <a href="mailto:info@ojascapital.co.uk">info@ojascapital.co.uk</a>. 
                 </p>
             </div>
     </div>
@@ -472,8 +480,9 @@
 
 
     <footer style="background-color: #f8fafc; padding: 1rem; text-align: center;">
-        <p style="color: #6b7280; font-size: 0.875rem;">&copy; 2025 Tristan Sherliker</p>
-        <p style="color: #6b7280; font-size: 0.875rem;">BunTool is an early development tool and is constantly being improved. If you want to get in touch, need help or have ideas for how to improve it, please contact <a href="mailto:tris@sherliker.net">tris@sherliker.net</a></p>
+        <p style="color: #6b7280; font-size: 0.875rem;">&copy; 2026 Ojas Capital Limited</p>
+        <p style="color: #6b7280; font-size: 0.75rem; font-style: italic;">Based on original work by Tristan Sherliker</p>
+        <p style="color: #6b7280; font-size: 0.875rem;">Court Bundle Tools is constantly being improved. If you want to get in touch, need help or have ideas for how to improve it, please contact <a href="mailto:info@ojascapital.co.uk">info@ojascapital.co.uk</a></p>
         </div>
 </body>
 </html>

@@ -364,7 +364,7 @@ bundleForm.addEventListener('submit', function (e) {
 function showDuplicateModal(filename) {
     const modal = document.getElementById('duplicateModal');
     const message = document.getElementById('duplicateMessage');
-    message.innerHTML = `<b>Duplicate file detected</b> <br><br> Did you mean to upload the file <i>'${filename}'</i> more than once?<br><br>Buntool has detected multiple copies of the same filename. This is usually a mistake, so BunTool will ignore the second copy for now. <br><br>If you do want to add the file twice, just make a copy of it with a different filename, and upload that.`;
+    message.innerHTML = `<b>Duplicate file detected</b> <br><br> Did you mean to upload the file <i>'${filename}'</i> more than once?<br><br>Court Bundle Tools has detected multiple copies of the same filename. This is usually a mistake, so Court Bundle Tools will ignore the second copy for now. <br><br>If you do want to add the file twice, just make a copy of it with a different filename, and upload that.`;
     modal.style.display = 'flex';
 }
 
