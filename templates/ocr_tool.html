@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='buntool.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
+    <script src="{{ url_for('static', filename='ocr_tool.js') }}" defer></script>
+    <title>PDF OCR Tool</title>
+</head>
+<body>
+    <div class="container">
+        <div class="app-subtitle"
+            style="display: flex; align-items: center; justify-content: center; color: #d57782; padding-top: 0;">
+            OCR and searchable text with
+        </div>
+        <div class="container">
+            <div class="app-header" style="display: flex; align-items: center; justify-content: center;">
+                <h1 class="app-title" style="font-size: 3.5rem; display: flex; align-items: center;">
+                    <span style="color: #ef8c51;">Court Bundle</span>
+                    <img src="{{ url_for('static', filename='buntool.webp') }}" alt="Court Bundle Tools Logo"
+                        style="width: 80px; height: auto; margin: 0 0.5rem;">
+                    <span style="color: #68b3cd;">Tools</span>
+                </h1>
+            </div>
+            <br>
+        </div>
+
+        <div class="intro-section" style="background-color: #f8fcff; padding: 1rem; text-align: left;">
+            <h2>PDF OCR Tool</h2>
+            <p>
+                Convert scanned PDFs into searchable PDFs by adding an OCR text layer.
+            </p>
+            <p style="margin-bottom: 0;">
+                <a href="{{ url_for('index') }}" style="text-decoration: underline; color: #0066cc;">← Back to Court Bundle Tools
+                    (Bundle Creator)</a>
+            </p>
+        </div>
+
+        <form id="ocrForm" action="/ocr_pdf" method="POST" enctype="multipart/form-data">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-file-pdf-box"></i>
+                    </div>
+                    <h2 class="card-title">Step 1 - Upload PDF File</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="pdf_file">Select PDF file:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required
+                                style="width: 100%; padding: 10px; border: 2px solid #ccc; border-radius: 5px;">
+                        </div>
+                        <small class="form-text text-muted">Maximum file size: 100 MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-tune"></i>
+                    </div>
+                    <h2 class="card-title">Step 2 - OCR Options</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="language">OCR language:</label>
+                        <input type="text" id="language" name="language" value="eng"
+                            placeholder="e.g. eng, eng+fra, deu">
+                        <small class="form-text text-muted">Use Tesseract language codes (default: eng).</small>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="skip_text" name="skip_text" checked>
+                            Skip OCR on pages with existing text
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="deskew" name="deskew" checked>
+                            Deskew pages (recommended for scans)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="mdi mdi-file-download-outline"></i>
+                    </div>
+                    <h2 class="card-title">Step 3 - Output filename</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="output_filename">Output filename:</label>
+                        <input type="text" id="output_filename" name="output_filename"
+                            placeholder="e.g. document_ocr.pdf">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Run OCR</button>
+                    <div id="processingState" style="display: none; margin-top: 1rem; text-align: center;">
+                        <i class="mdi mdi-loading mdi-spin"></i> Processing...
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="errorModal" class="modal" style="display: none;">
+        <div class="modal-content" style="padding: 20px; background: white; border-radius: 8px; max-width: 500px; margin: 20vh auto;">
+            <h3 style="color: #d9534f;">Error</h3>
+            <p id="errorMessage"></p>
+            <button type="button" onclick="closeErrorModal()" class="btn btn-secondary" style="margin-top: 10px;">Close</button>
+        </div>
+    </div>
+</body>
+</html>

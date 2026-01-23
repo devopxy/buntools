@@ -17,6 +17,9 @@ Court Bundle Tools is a comprehensive PDF manipulation suite that creates profes
 ✅ **PDF Merging** - Simple merge and reorder functionality
 ✅ **PDF Editing** - Reorder, delete, and rotate pages in a single PDF
 ✅ **Pagination & Page Size** - Resize pages to standard/custom sizes
+✅ **OCR (Searchable PDFs)** - Add text layer to scanned PDFs
+✅ **Version Comparison** - Compare two PDF versions and highlight text and structural differences
+✅ **Metadata Cleaner** - Remove privacy-sensitive metadata from PDFs
 ✅ **Court Compliance** - Output bundles comply with English Court requirements
 ✅ **Advanced Numbering** - Custom alphanumeric numbering (A1, B1, etc.) with page range mapping
 ✅ **Multiple Formats** - Export as PDF or ZIP with metadata
@@ -30,6 +33,9 @@ Court Bundle Tools is a comprehensive PDF manipulation suite that creates profes
 - **PDF Merger**: http://127.0.0.1:7001/pdf_merger
 - **PDF Editor**: http://127.0.0.1:7001/pdf_editor
 - **PDF Pagination & Size**: http://127.0.0.1:7001/pagination_tool
+- **PDF OCR**: http://127.0.0.1:7001/ocr_tool
+- **PDF Version Comparison**: http://127.0.0.1:7001/version_compare
+- **PDF Metadata Cleaner**: http://127.0.0.1:7001/metadata_cleaner
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 
@@ -114,6 +120,9 @@ Once running, access at:
 - **PDF Merger**: http://localhost:7001/pdf_merger
 - **PDF Editor**: http://localhost:7001/pdf_editor
 - **PDF Pagination & Size**: http://localhost:7001/pagination_tool
+- **PDF OCR**: http://localhost:7001/ocr_tool
+- **PDF Version Comparison**: http://localhost:7001/version_compare
+- **PDF Metadata Cleaner**: http://localhost:7001/metadata_cleaner
 
 📖 **Docker documentation**: See [DOCKER.md](DOCKER.md)
 
@@ -121,7 +130,7 @@ Once running, access at:
 
 ## Tools Overview
 
-Court Bundle Tools provides six main tools:
+Court Bundle Tools provides nine main tools:
 
 ### 1. PDF Bundle Creation Tool
 Create professional court bundles with:
@@ -166,6 +175,30 @@ Reorder, delete, and rotate pages within a single PDF.
 Resize pages to A4, A3, Legal, Letter, or custom sizes.
 
 **URL**: `/pagination_tool`
+
+### 7. PDF OCR Tool
+Add OCR text layers to scanned PDFs and produce searchable documents.
+
+**URL**: `/ocr_tool`
+
+### 8. PDF Version Comparison Tool
+Compare two PDF versions and generate detailed HTML reports showing:
+- Text differences with unified diff format
+- Structural differences (metadata, bookmarks, page count)
+- Page-by-page comparison with collapsible sections
+- Summary statistics and color-coded highlighting
+
+**URL**: `/version_compare`
+
+### 9. PDF Metadata Cleaner Tool
+Remove privacy-sensitive metadata from PDF files:
+- Document properties (author, title, subject, keywords)
+- XMP metadata (extended metadata)
+- Creation and modification dates (anonymize to epoch time)
+- Optional: Remove annotations and bookmarks
+- Preserves document content and functionality
+
+**URL**: `/metadata_cleaner`
 
 📖 **Complete tool documentation**: See [TOOLS.md](TOOLS.md)
 
@@ -222,6 +255,12 @@ Apply different numbering schemes to different page ranges:
 ### Required System Packages
 - **Python 3 + venv + pip**: `python3`, `python3-venv`, `python3-pip`
 - **pdftk**: required for the Bookmark Tool (`add_bookmarks.sh`)
+- **OCR runtime**: `ocrmypdf`, `tesseract-ocr`, `ghostscript`
+
+### OCR Language Packs
+Install language packs for OCR (default is English):
+- `tesseract-ocr-eng`
+- Add others as needed: `tesseract-ocr-fra`, `tesseract-ocr-deu`, etc.
 
 ### Recommended Build Packages
 These help if pip needs to build binary wheels locally (e.g., `pikepdf`):
