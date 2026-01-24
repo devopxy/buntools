@@ -13,16 +13,19 @@ Complete guide to all tools and features available in Court Bundle Tools.
 5. [PDF Merger Tool](#4-pdf-merger-tool)
 6. [PDF Editor Tool](#5-pdf-editor-tool)
 7. [PDF Pagination & Page Size Tool](#6-pdf-pagination--page-size-tool)
-8. [Advanced Features](#advanced-features)
-   - [Custom Alphanumeric Numbering](#custom-alphanumeric-numbering)
-   - [Page Range Mapping](#page-range-mapping)
-7. [Quick Reference](#quick-reference)
+8. [PDF OCR Tool](#7-pdf-ocr-tool)
+9. [PDF Version Comparison Tool](#8-pdf-version-comparison-tool)
+10. [PDF Metadata Cleaner Tool](#9-pdf-metadata-cleaner-tool)
+11. [Advanced Features](#advanced-features)
+    - [Custom Alphanumeric Numbering](#custom-alphanumeric-numbering)
+    - [Page Range Mapping](#page-range-mapping)
+12. [Quick Reference](#quick-reference)
 
 ---
 
 ## Overview
 
-Court Bundle Tools provides six main tools for PDF manipulation, plus advanced features for complex document bundling needs:
+Court Bundle Tools provides nine main tools for PDF manipulation, plus advanced features for complex document bundling needs:
 
 | Tool | Purpose | URL |
 |------|---------|-----|
@@ -32,6 +35,9 @@ Court Bundle Tools provides six main tools for PDF manipulation, plus advanced f
 | **PDF Merger** | Simple PDF merge and reorder | `/pdf_merger` |
 | **PDF Editor** | Reorder, delete, and rotate pages | `/pdf_editor` |
 | **PDF Pagination & Size** | Resize pages to standard/custom sizes | `/pagination_tool` |
+| **PDF OCR** | Make scanned PDFs searchable | `/ocr_tool` |
+| **PDF Version Comparison** | Compare two PDF versions and highlight differences | `/version_compare` |
+| **PDF Metadata Cleaner** | Remove privacy-sensitive metadata from PDFs | `/metadata_cleaner` |
 
 ---
 
@@ -363,6 +369,370 @@ Resize pages to a standard or custom page size.
 
 ---
 
+## 7. PDF OCR Tool
+
+### Overview
+Add an OCR text layer to scanned PDFs to make them searchable.
+
+**URL**: `http://127.0.0.1:7001/ocr_tool`
+
+### Features
+- ✅ OCR for scanned PDFs
+- ✅ Skip pages that already contain text
+- ✅ Deskew scanned pages
+- ✅ Language selection (Tesseract language codes)
+
+### How to Use
+
+1. **Upload PDF**: Select a scanned PDF
+2. **Choose language**: Default is `eng` (English). You can use `eng+fra`, `deu`, etc.
+3. **Options**:
+   - Skip pages with existing text (recommended)
+   - Deskew pages
+4. **Download**: Click "Run OCR" to get a searchable PDF
+
+### Notes
+- Requires `ocrmypdf`, `tesseract-ocr`, and `ghostscript` on the host system.
+- Install additional language packs for non-English OCR.
+
+---
+
+## 8. PDF Version Comparison Tool
+
+### Overview
+Compare two PDF versions and generate a detailed HTML report showing text differences, structural changes, and metadata variations.
+
+**URL**: `http://127.0.0.1:7001/version_compare`
+
+### Features
+- ✅ **Text Comparison**: Page-by-page text extraction and diff generation
+- ✅ **Structural Comparison**: Metadata, bookmarks, page count differences
+- ✅ **HTML Report**: Standalone, downloadable HTML report with embedded CSS
+- ✅ **Summary Statistics**: High-level overview of changes
+- ✅ **Detailed Page-by-Page**: Collapsible sections for each modified page
+- ✅ **Unified Diff Format**: Industry-standard diff output
+- ✅ **Color-Coded Highlighting**: Green (added), red (removed), yellow (modified)
+- ✅ **Whitespace Normalization**: Optional ignore whitespace differences
+
+### How to Use
+
+1. **Upload Version 1 (Original)**:
+   - Select the original/older PDF file
+   - Maximum file size: 100 MB
+
+2. **Upload Version 2 (Modified)**:
+   - Select the modified/newer PDF file
+   - Maximum file size: 100 MB
+
+3. **Select Options**:
+   - **Ignore whitespace differences**: Recommended for formatted documents
+   - Normalizes whitespace before comparison
+
+4. **Compare PDFs**:
+   - Click "Compare PDFs" button
+   - Processing time depends on file size (typically 2-30 seconds)
+
+5. **Download Report**:
+   - Automatically downloads HTML report
+   - Open in any web browser
+   - No internet connection required
+
+### Report Structure
+
+The generated HTML report contains:
+
+#### Summary Section
+- **Percentage Changed**: Overall change percentage
+- **Total Changes**: Count of modified/added/removed pages
+- **Page Difference**: Net change in page count
+- **Statistics**: Identical, modified, added, and removed pages
+
+#### Structural Differences
+- **File Information**: Size comparison, page counts
+- **Metadata Differences**: Author, title, creation date, etc.
+- **Bookmark Differences**: Added/removed bookmarks with page numbers
+
+#### Page-by-Page Comparison
+- **Collapsible Sections**: Click to expand details for each page
+- **Unified Diff**: Line-by-line changes in standard diff format
+- **Side-by-Side View**: Preview of text from both versions
+- **Statistics**: Lines added/removed per page
+- **Navigation**: Sticky navigation bar for quick access
+
+### Use Cases
+
+**Legal Documents**:
+- Compare contract revisions
+- Track changes between draft versions
+- Identify modifications in legal briefs
+- Verify final vs. draft documents
+
+**Court Bundles**:
+- Compare bundle versions before filing
+- Identify changes in exhibits
+- Track updates to witness statements
+- Verify pagination changes
+
+**Compliance**:
+- Document version control
+- Change tracking for audits
+- Regulatory filing comparisons
+- Quality assurance checks
+
+### Tips & Best Practices
+
+**Before Comparing**:
+- Ensure both files are text-searchable (not scanned images)
+- Use OCR tool first if files are scanned
+- Check file sizes (under 100 MB recommended)
+- Use descriptive filenames for clarity
+
+**Comparison Options**:
+- Enable "Ignore whitespace" for documents with formatting changes
+- Disable for documents where spacing is significant
+
+**Interpreting Results**:
+- Green = content added in Version 2
+- Red = content removed from Version 1
+- Yellow = content modified between versions
+- Gray = identical content (not shown in detailed view)
+
+**Performance**:
+- Small files (10 pages): ~2 seconds
+- Medium files (50 pages): ~10 seconds
+- Large files (100+ pages): ~30 seconds
+
+### Limitations
+
+- **Text-based comparison only**: Does not detect visual/image differences
+- **Scanned PDFs**: Requires OCR before comparison
+- **No content reflow detection**: Shows textual changes, not formatting
+- **File size limit**: 100 MB per file
+- **Language**: Works best with left-to-right text
+
+### Technical Details
+
+**Comparison Algorithm**:
+- Uses `pdfplumber` for text extraction
+- Python `difflib` for unified diff generation
+- pikepdf for metadata and bookmark extraction
+- pypdf for document properties parsing
+
+**Output Format**:
+- Standalone HTML file
+- Embedded CSS (no external dependencies)
+- Responsive design (mobile-friendly)
+- Jinja2 templating
+
+---
+
+## 9. PDF Metadata Cleaner Tool
+
+### Overview
+Remove privacy-sensitive metadata from PDF files to protect confidential information and comply with privacy requirements.
+
+**URL**: `http://127.0.0.1:7001/metadata_cleaner`
+
+### Features
+- ✅ **Document Metadata Removal**: Author, title, subject, keywords, creator, producer
+- ✅ **XMP Metadata Removal**: Extended metadata including Adobe XMP, Dublin Core
+- ✅ **Date Anonymization**: Set creation/modification dates to epoch time (1970-01-01)
+- ✅ **Optional Annotation Removal**: Remove comments, highlights, sticky notes
+- ✅ **Optional Bookmark Removal**: Remove document outline/table of contents
+- ✅ **Preserves Content**: Does not modify text, images, or page structure
+- ✅ **Detailed Report**: Shows exactly what was removed
+
+### How to Use
+
+1. **Upload PDF**:
+   - Select a PDF file to clean
+   - Maximum file size: 100 MB
+
+2. **Select Cleaning Options**:
+
+   **Recommended Options (Default: ON)**:
+   - ✅ **Remove Document Metadata**: Strips title, author, subject, keywords, creator, producer
+   - ✅ **Remove XMP Metadata**: Removes extended metadata (Adobe XMP, Dublin Core, custom fields)
+   - ✅ **Anonymize Dates**: Sets creation/modification dates to 1970-01-01 instead of removing them
+
+   **Optional Cleaning (Default: OFF)**:
+   - ☐ **Remove Annotations**: Removes comments, highlights, sticky notes (may affect usability)
+   - ☐ **Remove Bookmarks**: Removes document outline/TOC (may affect navigation)
+
+3. **Clean PDF**:
+   - Click "Clean PDF Metadata" button
+   - Processing is fast (typically <2 seconds)
+
+4. **Download Cleaned PDF**:
+   - Automatically downloads file with "_cleaned" suffix
+   - Example: `contract.pdf` → `contract_cleaned.pdf`
+
+### What Gets Removed
+
+#### Document Properties (Standard Metadata)
+The following fields are removed when "Remove Document Metadata" is enabled:
+
+- **Title**: Document title
+- **Author**: Creator/author name
+- **Subject**: Document subject/description
+- **Keywords**: Search keywords and tags
+- **Creator**: Application that created the document
+- **Producer**: PDF generation software
+- **Company**: Organization name (if present)
+- **SourceModified**: Original file modification info
+- **Trapped**: PDF trapping information
+
+#### XMP Metadata (Extended Metadata)
+When "Remove XMP Metadata" is enabled, removes:
+
+- Adobe XMP metadata stream
+- Dublin Core metadata
+- Custom metadata fields
+- Extended properties
+- Rights management information
+- Document history
+
+#### Dates
+When "Anonymize Dates" is enabled:
+
+- **CreationDate**: Set to `D:19700101000000Z` (January 1, 1970)
+- **ModDate**: Set to `D:19700101000000Z`
+
+This preserves the date fields (some systems require them) while removing actual timestamp information.
+
+#### Annotations (Optional)
+When "Remove Annotations" is enabled:
+
+- Comments and text notes
+- Highlights and underlines
+- Sticky notes
+- Stamps and shapes
+- Form field comments
+- Review markup
+
+⚠️ **Warning**: Removing annotations may affect document usability if they contain important information.
+
+#### Bookmarks (Optional)
+When "Remove Bookmarks" is enabled:
+
+- Document outline/table of contents
+- Nested bookmark structure
+- All bookmark destinations
+
+⚠️ **Warning**: Removing bookmarks may make navigation difficult in long documents.
+
+### Use Cases
+
+**Legal Documents**:
+- Remove lawyer/firm identifying information before filing
+- Strip metadata before discovery production
+- Clean documents before sharing with opposing counsel
+- Anonymize author information for blind review
+
+**Court Submissions**:
+- Ensure no metadata leaks sensitive information
+- Comply with court e-filing requirements
+- Remove internal comments before filing
+- Strip version history and edit tracking
+
+**Public Disclosure**:
+- Clean documents before FOIA/public records release
+- Remove internal organizational information
+- Strip employee names and identifiers
+- Anonymize creation software/workflow
+
+**Privacy Compliance**:
+- GDPR compliance for document sharing
+- Remove personal identifying information
+- Data minimization for external sharing
+- Pseudonymization of authored documents
+
+**Evidence Handling**:
+- Strip metadata that could compromise investigation
+- Remove identifying information from exhibits
+- Clean documents before expert review
+- Anonymize sources for sensitive cases
+
+### Tips & Best Practices
+
+**Before Cleaning**:
+- **Make a backup**: Always keep the original file
+- **Review content**: Ensure no sensitive info in actual text/images
+- **Check requirements**: Verify what metadata your recipient needs
+- **Test functionality**: Ensure bookmarks/annotations aren't critical
+
+**Recommended Settings**:
+- For **general use**: Enable all three recommended options (metadata, XMP, dates)
+- For **maximum privacy**: Enable all five options
+- For **court filing**: Enable metadata and XMP only (preserve bookmarks)
+- For **internal review**: Enable metadata only (preserve dates for tracking)
+
+**After Cleaning**:
+- **Verify the result**: Open cleaned PDF and check functionality
+- **Inspect metadata**: Use PDF properties to confirm cleaning
+- **Test navigation**: If bookmarks were removed, verify TOC
+- **Check annotations**: If removed, ensure no critical info lost
+
+**What Won't Be Removed**:
+- Text content in the PDF
+- Images and graphics
+- Page structure and layout
+- Fonts and formatting
+- Form fields (unless annotations are removed)
+- Digital signatures (preserved separately)
+
+### Verification
+
+To verify metadata has been removed:
+
+**Adobe Acrobat**:
+1. File → Properties → Description tab
+2. Check that fields are empty or show "Unknown"
+3. Additional Metadata → Show all fields
+
+**Preview (macOS)**:
+1. Tools → Show Inspector
+2. Check Info tab for empty fields
+
+**PDFtk**:
+```bash
+pdftk input_cleaned.pdf dump_data
+```
+
+**ExifTool**:
+```bash
+exiftool input_cleaned.pdf
+```
+
+### Limitations
+
+- **Does not remove text**: Sensitive info in actual document content is not affected
+- **Does not remove images**: Photos, logos, signatures remain unchanged
+- **Does not sanitize filenames**: Rename file separately if needed
+- **Does not remove digital signatures**: Signature metadata preserved
+- **Does not affect permissions**: File permissions/restrictions unchanged
+
+### Technical Details
+
+**Implementation**:
+- Uses `pikepdf` library for PDF manipulation
+- Direct metadata stream modification
+- XMP removal at PDF object level
+- Date anonymization preserves field structure
+
+**Performance**:
+- Small files (<1 MB): <1 second
+- Medium files (1-10 MB): 1-2 seconds
+- Large files (10-100 MB): 2-5 seconds
+
+**Compatibility**:
+- Works with PDF versions 1.3-2.0
+- Preserves PDF/A compliance (if dates not anonymized)
+- Compatible with all major PDF readers
+- Maintains file structure integrity
+
+---
+
 ## Advanced Features
 
 ### Custom Alphanumeric Numbering
@@ -559,6 +929,7 @@ Works with:
 | Just merge PDFs | PDF Merger Tool |
 | Reorder/rotate/delete pages | PDF Editor Tool |
 | Resize to A4/A3/Legal/Custom | PDF Pagination & Size Tool |
+| Make scanned PDFs searchable | PDF OCR Tool |
 | Tab divider numbering (A1, B1) | Bundle/Numbering + Custom Alpha |
 | Different numbering per section | Bundle/Numbering + Page Range Mapping |
 

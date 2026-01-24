@@ -2811,6 +2811,470 @@ def create_zip_file(
     return int_zip_filepath
 
 
+# ==========================================
+# PDF VERSION COMPARISON FUNCTIONS
+# ==========================================
+
+def compare_pdfs_text(pdf1_path, pdf2_path, ignore_whitespace=False):
+    """
+    Extract and compare text content page-by-page from two PDFs.
+
+    Args:
+        pdf1_path: Path to first PDF (version 1)
+        pdf2_path: Path to second PDF (version 2)
+        ignore_whitespace: If True, normalize whitespace before comparison
+
+    Returns:
+        dict: {
+            'total_pages_v1': int,
+            'total_pages_v2': int,
+            'page_diffs': [
+                {
+                    'page_num': int,
+                    'status': 'identical'|'modified'|'added'|'removed',
+                    'text_v1': str,
+                    'text_v2': str,
+                    'unified_diff': str,
+                    'stats': {'lines_added': int, 'lines_removed': int}
+                }
+            ],
+            'summary': {
+                'identical_pages': int,
+                'modified_pages': int,
+                'added_pages': int,
+                'removed_pages': int,
+                'total_changes': int,
+                'percent_changed': float
+            }
+        }
+    """
+    import pdfplumber
+    import difflib
+
+    results = {
+        'page_diffs': [],
+        'summary': {
+            'identical_pages': 0,
+            'modified_pages': 0,
+            'added_pages': 0,
+            'removed_pages': 0
+        }
+    }
+
+    # Extract text from both PDFs
+    with pdfplumber.open(pdf1_path) as pdf1, pdfplumber.open(pdf2_path) as pdf2:
+        results['total_pages_v1'] = len(pdf1.pages)
+        results['total_pages_v2'] = len(pdf2.pages)
+
+        max_pages = max(len(pdf1.pages), len(pdf2.pages))
+
+        for page_num in range(max_pages):
+            page_diff = {'page_num': page_num + 1}
+
+            # Extract text (handle missing pages)
+            text_v1 = None
+            text_v2 = None
+
+            if page_num < len(pdf1.pages):
+                text_v1 = pdf1.pages[page_num].extract_text()
+                if text_v1 is None:
+                    text_v1 = ""
+
+            if page_num < len(pdf2.pages):
+                text_v2 = pdf2.pages[page_num].extract_text()
+                if text_v2 is None:
+                    text_v2 = ""
+
+            # Normalize whitespace if requested
+            if ignore_whitespace and text_v1 is not None:
+                text_v1 = ' '.join(text_v1.split())
+            if ignore_whitespace and text_v2 is not None:
+                text_v2 = ' '.join(text_v2.split())
+
+            # Determine status
+            if text_v1 is None:
+                # Page only exists in version 2
+                page_diff['status'] = 'added'
+                page_diff['text_v1'] = '[Page not present]'
+                page_diff['text_v2'] = text_v2
+                page_diff['unified_diff'] = ''
+                results['summary']['added_pages'] += 1
+            elif text_v2 is None:
+                # Page only exists in version 1
+                page_diff['status'] = 'removed'
+                page_diff['text_v1'] = text_v1
+                page_diff['text_v2'] = '[Page not present]'
+                page_diff['unified_diff'] = ''
+                results['summary']['removed_pages'] += 1
+            elif text_v1 == text_v2:
+                # Pages are identical
+                page_diff['status'] = 'identical'
+                page_diff['text_v1'] = text_v1
+                page_diff['text_v2'] = text_v2
+                page_diff['unified_diff'] = ''
+                results['summary']['identical_pages'] += 1
+            else:
+                # Pages are different
+                page_diff['status'] = 'modified'
+                page_diff['text_v1'] = text_v1
+                page_diff['text_v2'] = text_v2
+                results['summary']['modified_pages'] += 1
+
+                # Generate unified diff
+                lines_v1 = text_v1.splitlines(keepends=False)
+                lines_v2 = text_v2.splitlines(keepends=False)
+
+                diff_generator = difflib.unified_diff(
+                    lines_v1, lines_v2,
+                    fromfile=f'Version 1 (Page {page_num + 1})',
+                    tofile=f'Version 2 (Page {page_num + 1})',
+                    lineterm=''
+                )
+                diff_lines = list(diff_generator)
+                page_diff['unified_diff'] = '\n'.join(diff_lines)
+
+                # Calculate stats
+                lines_added = sum(1 for line in diff_lines if line.startswith('+') and not line.startswith('+++'))
+                lines_removed = sum(1 for line in diff_lines if line.startswith('-') and not line.startswith('---'))
+
+                page_diff['stats'] = {
+                    'lines_added': lines_added,
+                    'lines_removed': lines_removed
+                }
+
+            results['page_diffs'].append(page_diff)
+
+        # Calculate summary stats
+        total_changes = (results['summary']['modified_pages'] +
+                        results['summary']['added_pages'] +
+                        results['summary']['removed_pages'])
+        results['summary']['total_changes'] = total_changes
+        results['summary']['percent_changed'] = (total_changes / max_pages * 100) if max_pages > 0 else 0
+
+    return results
+
+
+def compare_pdfs_structure(pdf1_path, pdf2_path):
+    """
+    Compare structural properties of two PDFs: metadata, bookmarks, page count.
+
+    Args:
+        pdf1_path: Path to first PDF (version 1)
+        pdf2_path: Path to second PDF (version 2)
+
+    Returns:
+        dict: {
+            'file_info': {
+                'v1': {'filename': str, 'size_bytes': int, 'size_human': str},
+                'v2': {...}
+            },
+            'page_count': {'v1': int, 'v2': int, 'difference': int},
+            'metadata': {
+                'v1': dict,
+                'v2': dict,
+                'differences': [{'field': str, 'v1_value': str, 'v2_value': str}]
+            },
+            'bookmarks': {
+                'v1': list,
+                'v2': list,
+                'differences': {'added': list, 'removed': list, 'count_v1': int, 'count_v2': int}
+            }
+        }
+    """
+    import os
+    import pikepdf
+    from pypdf import PdfReader
+
+    def format_file_size(size_bytes):
+        """Convert bytes to human-readable format"""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size_bytes < 1024.0:
+                return f"{size_bytes:.1f} {unit}"
+            size_bytes /= 1024.0
+        return f"{size_bytes:.1f} TB"
+
+    def extract_bookmarks_list(pikepdf_obj):
+        """Extract bookmarks as list of dicts from pikepdf object"""
+        bookmarks = []
+        try:
+            with pikepdf_obj.open_outline() as outline:
+                if outline.root:
+                    for item in outline.root:
+                        bookmarks.append({
+                            'title': str(item.title),
+                            'page': item.destination[0] if item.destination else None
+                        })
+        except Exception:
+            pass  # No bookmarks
+        return bookmarks
+
+    def compare_bookmark_lists(bookmarks_v1, bookmarks_v2):
+        """Compare two bookmark lists"""
+        # Simple comparison by title and page
+        titles_v1 = {(bm['title'], bm['page']) for bm in bookmarks_v1}
+        titles_v2 = {(bm['title'], bm['page']) for bm in bookmarks_v2}
+
+        return {
+            'added': [{'title': t, 'page': p} for t, p in (titles_v2 - titles_v1)],
+            'removed': [{'title': t, 'page': p} for t, p in (titles_v1 - titles_v2)],
+            'count_v1': len(bookmarks_v1),
+            'count_v2': len(bookmarks_v2)
+        }
+
+    results = {}
+
+    # File info
+    results['file_info'] = {
+        'v1': {
+            'filename': os.path.basename(pdf1_path),
+            'size_bytes': os.path.getsize(pdf1_path),
+            'size_human': format_file_size(os.path.getsize(pdf1_path))
+        },
+        'v2': {
+            'filename': os.path.basename(pdf2_path),
+            'size_bytes': os.path.getsize(pdf2_path),
+            'size_human': format_file_size(os.path.getsize(pdf2_path))
+        }
+    }
+
+    # Page count and metadata (using pikepdf and pypdf)
+    with pikepdf.Pdf.open(pdf1_path) as pdf1, pikepdf.Pdf.open(pdf2_path) as pdf2:
+        page_count_v1 = len(pdf1.pages)
+        page_count_v2 = len(pdf2.pages)
+
+        results['page_count'] = {
+            'v1': page_count_v1,
+            'v2': page_count_v2,
+            'difference': page_count_v2 - page_count_v1
+        }
+
+        # Metadata comparison (using pypdf for better metadata parsing)
+        reader1 = PdfReader(pdf1_path)
+        reader2 = PdfReader(pdf2_path)
+
+        metadata_v1 = reader1.metadata or {}
+        metadata_v2 = reader2.metadata or {}
+
+        # Convert metadata to dict for comparison
+        meta_dict_v1 = {str(k).replace('/', ''): str(v) for k, v in metadata_v1.items()}
+        meta_dict_v2 = {str(k).replace('/', ''): str(v) for k, v in metadata_v2.items()}
+
+        # Find differences
+        all_keys = set(meta_dict_v1.keys()) | set(meta_dict_v2.keys())
+        differences = []
+        for key in sorted(all_keys):
+            val1 = meta_dict_v1.get(key, '[Not set]')
+            val2 = meta_dict_v2.get(key, '[Not set]')
+            if val1 != val2:
+                differences.append({'field': key, 'v1_value': val1, 'v2_value': val2})
+
+        results['metadata'] = {
+            'v1': meta_dict_v1,
+            'v2': meta_dict_v2,
+            'differences': differences
+        }
+
+        # Bookmark comparison (using pikepdf outline)
+        bookmarks_v1 = extract_bookmarks_list(pdf1)
+        bookmarks_v2 = extract_bookmarks_list(pdf2)
+
+        results['bookmarks'] = {
+            'v1': bookmarks_v1,
+            'v2': bookmarks_v2,
+            'differences': compare_bookmark_lists(bookmarks_v1, bookmarks_v2)
+        }
+
+    return results
+
+
+def generate_comparison_html(text_results, structure_results, output_path):
+    """
+    Generate standalone HTML comparison report.
+
+    Args:
+        text_results: dict from compare_pdfs_text()
+        structure_results: dict from compare_pdfs_structure()
+        output_path: Path where HTML report should be saved
+
+    Returns:
+        str: Path to generated HTML file
+    """
+    from datetime import datetime
+    from jinja2 import Template
+
+    # Prepare template context
+    context = {
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'filename_v1': structure_results['file_info']['v1']['filename'],
+        'filename_v2': structure_results['file_info']['v2']['filename'],
+        'size_v1': structure_results['file_info']['v1']['size_human'],
+        'size_v2': structure_results['file_info']['v2']['size_human'],
+        'pages_v1': structure_results['page_count']['v1'],
+        'pages_v2': structure_results['page_count']['v2'],
+        'page_count_diff': structure_results['page_count']['difference'],
+        'metadata_differences': structure_results['metadata']['differences'],
+        'bookmark_differences': structure_results['bookmarks']['differences'],
+        'percent_changed': round(text_results['summary']['percent_changed'], 1),
+        'total_changes': text_results['summary']['total_changes'],
+        'identical_pages': text_results['summary']['identical_pages'],
+        'modified_pages': text_results['summary']['modified_pages'],
+        'added_pages': text_results['summary']['added_pages'],
+        'removed_pages': text_results['summary']['removed_pages'],
+        'page_diffs': text_results['page_diffs']
+    }
+
+    # Load template from file
+    import os
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    template_path = os.path.join(template_dir, 'comparison_report_template.html')
+
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template_string = f.read()
+
+    template = Template(template_string)
+    html_content = template.render(**context)
+
+    # Write HTML to output path
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+    return output_path
+
+
+# ==========================================
+# PDF METADATA CLEANER FUNCTION
+# ==========================================
+
+def clean_pdf_metadata(input_pdf_path, output_pdf_path, options=None):
+    """
+    Remove privacy-sensitive metadata from a PDF file.
+
+    Args:
+        input_pdf_path: Path to input PDF file
+        output_pdf_path: Path to save cleaned PDF
+        options: dict with cleaning options:
+            - remove_metadata: bool (default True) - Remove document info metadata
+            - remove_xmp: bool (default True) - Remove XMP metadata
+            - remove_annotations: bool (default False) - Remove annotations/comments
+            - remove_bookmarks: bool (default False) - Remove bookmarks
+            - anonymize_dates: bool (default True) - Set dates to epoch time
+
+    Returns:
+        dict: {
+            'success': bool,
+            'items_removed': {
+                'metadata_fields': list,
+                'xmp_metadata': bool,
+                'annotations': int,
+                'bookmarks': int
+            },
+            'message': str
+        }
+    """
+    import pikepdf
+    from datetime import datetime
+
+    # Default options
+    if options is None:
+        options = {}
+
+    remove_metadata = options.get('remove_metadata', True)
+    remove_xmp = options.get('remove_xmp', True)
+    remove_annotations = options.get('remove_annotations', False)
+    remove_bookmarks = options.get('remove_bookmarks', False)
+    anonymize_dates = options.get('anonymize_dates', True)
+
+    result = {
+        'success': False,
+        'items_removed': {
+            'metadata_fields': [],
+            'xmp_metadata': False,
+            'annotations': 0,
+            'bookmarks': 0
+        },
+        'message': ''
+    }
+
+    try:
+        with pikepdf.Pdf.open(input_pdf_path) as pdf:
+            # 1. Remove document info metadata
+            if remove_metadata:
+                metadata_fields_removed = []
+
+                # Standard metadata fields
+                metadata_keys = [
+                    '/Title', '/Author', '/Subject', '/Keywords',
+                    '/Creator', '/Producer', '/CreationDate', '/ModDate',
+                    '/Trapped', '/Company', '/SourceModified'
+                ]
+
+                for key in metadata_keys:
+                    if key in pdf.docinfo:
+                        del pdf.docinfo[key]
+                        metadata_fields_removed.append(key.replace('/', ''))
+
+                result['items_removed']['metadata_fields'] = metadata_fields_removed
+
+            # 2. Anonymize dates if requested (instead of removing)
+            elif anonymize_dates:
+                # Set to epoch time (1970-01-01)
+                epoch_date = "D:19700101000000Z"
+                if '/CreationDate' in pdf.docinfo:
+                    pdf.docinfo['/CreationDate'] = epoch_date
+                if '/ModDate' in pdf.docinfo:
+                    pdf.docinfo['/ModDate'] = epoch_date
+
+            # 3. Remove XMP metadata (extended metadata)
+            if remove_xmp:
+                if '/Metadata' in pdf.Root:
+                    del pdf.Root.Metadata
+                    result['items_removed']['xmp_metadata'] = True
+
+            # 4. Remove annotations (comments, highlights, etc.)
+            if remove_annotations:
+                annotations_count = 0
+                for page in pdf.pages:
+                    if '/Annots' in page:
+                        annotations_count += len(page.Annots)
+                        del page.Annots
+                result['items_removed']['annotations'] = annotations_count
+
+            # 5. Remove bookmarks/outline
+            if remove_bookmarks:
+                try:
+                    with pdf.open_outline() as outline:
+                        if outline.root:
+                            bookmarks_count = len(list(outline.root))
+                            result['items_removed']['bookmarks'] = bookmarks_count
+
+                    # Remove the outline
+                    if '/Outlines' in pdf.Root:
+                        del pdf.Root.Outlines
+                except Exception:
+                    pass  # No bookmarks to remove
+
+            # Save the cleaned PDF
+            pdf.save(output_pdf_path)
+
+            result['success'] = True
+
+            # Build summary message
+            total_items = (
+                len(result['items_removed']['metadata_fields']) +
+                (1 if result['items_removed']['xmp_metadata'] else 0) +
+                result['items_removed']['annotations'] +
+                result['items_removed']['bookmarks']
+            )
+
+            result['message'] = f"Successfully cleaned PDF. Removed {total_items} privacy-sensitive items."
+
+    except Exception as e:
+        result['success'] = False
+        result['message'] = f"Error cleaning metadata: {str(e)}"
+
+    return result
+
+
 def main():
     '''
     Command line usage. Mainly used for spot-testing during development.

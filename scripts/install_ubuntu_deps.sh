@@ -7,6 +7,11 @@ sudo apt-get install -y \
   python3-venv \
   python3-pip \
   pdftk \
+  tesseract-ocr \
+  tesseract-ocr-eng \
+  tesseract-ocr-fra \
+  tesseract-ocr-deu \
+  ghostscript \
   build-essential \
   libqpdf-dev
 

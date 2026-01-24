@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Comparison Report</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        nav {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .summary {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .summary h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .stat-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .section {
+            margin: 30px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #f0f0f0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .section-header h2 {
+            color: #333;
+            font-size: 1.3em;
+        }
+        .section-body {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        table th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #555;
+        }
+        table tr:hover {
+            background: #f9f9f9;
+        }
+        .diff-added {
+            background: #d4edda;
+            color: #155724;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .diff-removed {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .diff-modified {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .collapsible {
+            cursor: pointer;
+            background: #f8f9ff;
+            border: 1px solid #667eea;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .collapsible:hover {
+            background: #eef0ff;
+        }
+        .collapsible.diff-added-header {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .collapsible.diff-removed-header {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .collapsible.diff-modified-header {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        .collapsible-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        .collapsible-content.active {
+            display: block;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            overflow-x: auto;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        .side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .side-by-side > div {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        .side-by-side h4 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .no-differences {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .side-by-side {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav>
+            <strong><i class="mdi mdi-file-compare"></i> PDF Comparison Report</strong>
+            <a href="#summary">Summary</a>
+            <a href="#structural">Structural</a>
+            <a href="#page-by-page">Page-by-Page</a>
+        </nav>
+
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="mdi mdi-file-compare"></i> PDF Version Comparison Report</h1>
+            <p><strong>Generated:</strong> {{ timestamp }}</p>
+            <p><strong>Version 1:</strong> {{ filename_v1 }} | <strong>Version 2:</strong> {{ filename_v2 }}</p>
+        </div>
+
+        <div class="content">
+            <!-- Summary Section -->
+            <div id="summary" class="summary">
+                <h2><i class="mdi mdi-chart-box"></i> Summary</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>{{ percent_changed }}%</h3>
+                        <p>Pages Changed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>{{ total_changes }}</h3>
+                        <p>Total Changes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>{{ page_count_diff }}</h3>
+                        <p>Page Difference</p>
+                    </div>
+                </div>
+                <p><span class="badge badge-success"><i class="mdi mdi-check"></i> Identical: {{ identical_pages }} pages</span></p>
+                <p><span class="badge badge-warning"><i class="mdi mdi-pencil"></i> Modified: {{ modified_pages }} pages</span></p>
+                <p><span class="badge badge-success"><i class="mdi mdi-plus"></i> Added: {{ added_pages }} pages</span></p>
+                <p><span class="badge badge-danger"><i class="mdi mdi-minus"></i> Removed: {{ removed_pages }} pages</span></p>
+            </div>
+
+            <!-- Structural Differences -->
+            <div id="structural" class="section">
+                <div class="section-header">
+                    <h2><i class="mdi mdi-file-tree"></i> Structural Differences</h2>
+                </div>
+                <div class="section-body">
+                    <h3>File Information</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Version 1</th>
+                            <th>Version 2</th>
+                        </tr>
+                        <tr>
+                            <td>File Size</td>
+                            <td>{{ size_v1 }}</td>
+                            <td>{{ size_v2 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Page Count</td>
+                            <td>{{ pages_v1 }}</td>
+                            <td>{{ pages_v2 }}</td>
+                        </tr>
+                    </table>
+
+                    <h3>Metadata Differences</h3>
+                    {% if metadata_differences %}
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Version 1</th>
+                            <th>Version 2</th>
+                        </tr>
+                        {% for diff in metadata_differences %}
+                        <tr>
+                            <td><strong>{{ diff.field }}</strong></td>
+                            <td>{{ diff.v1_value }}</td>
+                            <td>{{ diff.v2_value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    {% else %}
+                    <p class="no-differences"><i class="mdi mdi-check-circle"></i> No metadata differences found.</p>
+                    {% endif %}
+
+                    <h3>Bookmark Differences</h3>
+                    {% if bookmark_differences.added or bookmark_differences.removed %}
+                    <p><strong>Bookmarks in Version 1:</strong> {{ bookmark_differences.count_v1 }}</p>
+                    <p><strong>Bookmarks in Version 2:</strong> {{ bookmark_differences.count_v2 }}</p>
+                    {% if bookmark_differences.added %}
+                    <p><span class="badge badge-success"><i class="mdi mdi-plus"></i> Added: {{ bookmark_differences.added | length }} bookmarks</span></p>
+                    <ul>
+                        {% for bm in bookmark_differences.added %}
+                        <li>{{ bm.title }} (Page {{ bm.page }})</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if bookmark_differences.removed %}
+                    <p><span class="badge badge-danger"><i class="mdi mdi-minus"></i> Removed: {{ bookmark_differences.removed | length }} bookmarks</span></p>
+                    <ul>
+                        {% for bm in bookmark_differences.removed %}
+                        <li>{{ bm.title }} (Page {{ bm.page }})</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% else %}
+                    <p class="no-differences"><i class="mdi mdi-check-circle"></i> No bookmark differences found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Page-by-Page Comparison -->
+            <div id="page-by-page" class="section">
+                <div class="section-header">
+                    <h2><i class="mdi mdi-file-document-multiple"></i> Page-by-Page Comparison</h2>
+                </div>
+                <div class="section-body">
+                    <p style="margin-bottom: 15px; color: #666;">Click on a page to view detailed differences. Only showing pages with differences.</p>
+
+                    {% set has_differences = namespace(value=False) %}
+                    {% for page_diff in page_diffs %}
+                        {% if page_diff.status != 'identical' %}
+                            {% set has_differences.value = True %}
+                            <div class="collapsible collapsible-{{ page_diff.status }}-header" onclick="toggleContent(this)">
+                                <span>
+                                    <strong>Page {{ page_diff.page_num }}</strong> -
+                                    <span class="diff-{{ page_diff.status }}">{{ page_diff.status | upper }}</span>
+                                    {% if page_diff.stats %}
+                                    ({{ page_diff.stats.lines_added }} added, {{ page_diff.stats.lines_removed }} removed)
+                                    {% endif %}
+                                </span>
+                                <i class="mdi mdi-chevron-down"></i>
+                            </div>
+                            <div class="collapsible-content">
+                                {% if page_diff.unified_diff %}
+                                <h4><i class="mdi mdi-code-tags"></i> Unified Diff</h4>
+                                <pre>{{ page_diff.unified_diff }}</pre>
+                                {% endif %}
+
+                                <h4><i class="mdi mdi-table-column"></i> Side-by-Side Comparison</h4>
+                                <div class="side-by-side">
+                                    <div>
+                                        <h4>Version 1</h4>
+                                        <pre>{{ page_diff.text_v1[:1000] }}{% if page_diff.text_v1 | length > 1000 %}...{% endif %}</pre>
+                                    </div>
+                                    <div>
+                                        <h4>Version 2</h4>
+                                        <pre>{{ page_diff.text_v2[:1000] }}{% if page_diff.text_v2 | length > 1000 %}...{% endif %}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if not has_differences.value %}
+                    <p class="no-differences"><i class="mdi mdi-check-circle-outline"></i> All pages are identical! No differences found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleContent(element) {
+            const content = element.nextElementSibling;
+            const icon = element.querySelector('.mdi-chevron-down, .mdi-chevron-up');
+
+            content.classList.toggle('active');
+
+            if (content.classList.contains('active')) {
+                icon.classList.remove('mdi-chevron-down');
+                icon.classList.add('mdi-chevron-up');
+            } else {
+                icon.classList.remove('mdi-chevron-up');
+                icon.classList.add('mdi-chevron-down');
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -400,6 +400,12 @@ def pagination_tool():
     return render_template('pagination_tool.html')
 
 
+@app.route('/ocr_tool')
+def ocr_tool():
+    """Display the OCR tool interface"""
+    return render_template('ocr_tool.html')
+
+
 @app.route('/merge_pdfs', methods=['POST'])
 def merge_pdfs_route():
     """Process and merge multiple PDF files"""
@@ -590,6 +596,112 @@ def paginate_pdf_route():
             app.logger.warning(f"[PS]Could not clean up temporary files: {str(e)}")
 
 
+@app.route('/ocr_pdf', methods=['POST'])
+def ocr_pdf_route():
+    """Apply OCR to a single PDF file"""
+    session_id = str(uuid.uuid4())[:8]
+    temp_dir = None
+    base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
+
+    try:
+        if 'pdf_file' not in request.files:
+            return jsonify({"status": "error", "message": "No PDF file provided"}), 400
+
+        pdf_file = request.files['pdf_file']
+        if not pdf_file or pdf_file.filename == '':
+            return jsonify({"status": "error", "message": "No PDF file selected"}), 400
+
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({"status": "error", "message": "File must be a PDF"}), 400
+
+        temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        app.logger.debug(f"[OCR]Created temp directory: {temp_dir}")
+
+        input_pdf_path = os.path.join(temp_dir, secure_filename(pdf_file.filename))
+        pdf_file.save(input_pdf_path)
+        app.logger.info(f"[OCR]Saved uploaded PDF to: {input_pdf_path}")
+
+        output_filename = request.form.get('output_filename', '').strip()
+        if not output_filename:
+            base_name = os.path.splitext(pdf_file.filename)[0]
+            output_filename = f"{base_name}_ocr.pdf"
+        if not output_filename.lower().endswith('.pdf'):
+            output_filename += '.pdf'
+
+        output_pdf_path = os.path.join(temp_dir, secure_filename(output_filename))
+
+        language = request.form.get('language', 'eng').strip() or 'eng'
+        skip_text = request.form.get('skip_text', 'on') == 'on'
+        deskew = request.form.get('deskew', 'on') == 'on'
+
+        import sys
+        ocr_command = ['ocrmypdf']
+        ocr_args = [
+            '--output-type', 'pdf',
+            '--optimize', '1',
+        ]
+        if language:
+            ocr_args += ['--language', language]
+        if skip_text:
+            ocr_args.append('--skip-text')
+        if deskew:
+            ocr_args.append('--deskew')
+
+        ocr_args += [input_pdf_path, output_pdf_path]
+
+        import subprocess
+        try:
+            full_args = ocr_command + ocr_args
+            app.logger.debug(f"[OCR]Running: {' '.join(full_args)}")
+            result = subprocess.run(full_args, capture_output=True, text=True)
+        except FileNotFoundError:
+            full_args = [sys.executable, '-m', 'ocrmypdf'] + ocr_args
+            app.logger.debug(f"[OCR]Running fallback: {' '.join(full_args)}")
+            result = subprocess.run(full_args, capture_output=True, text=True)
+        if result.returncode != 0:
+            app.logger.error(f"[OCR]OCR failed: {result.stderr}")
+            return jsonify({"status": "error", "message": f"OCR failed: {result.stderr.strip()}"}), 500
+
+        if not os.path.exists(output_pdf_path):
+            app.logger.error(f"[OCR]OCR output missing: {output_pdf_path}")
+            combined_output = (result.stdout or "") + "\n" + (result.stderr or "")
+            return jsonify({
+                "status": "error",
+                "message": "OCR did not produce an output file.",
+                "details": combined_output.strip()
+            }), 500
+
+        with open(output_pdf_path, 'rb') as output_handle:
+            pdf_bytes = output_handle.read()
+
+        from io import BytesIO
+        return send_file(
+            BytesIO(pdf_bytes),
+            as_attachment=True,
+            download_name=output_filename,
+            mimetype='application/pdf'
+        )
+
+    except FileNotFoundError:
+        return jsonify({
+            "status": "error",
+            "message": "OCR tool not found. Please install ocrmypdf and tesseract (see scripts/install_ubuntu_deps.sh)."
+        }), 500
+    except Exception as e:
+        app.logger.error(f"[OCR]Unexpected error in ocr_pdf_route: {str(e)}")
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+    finally:
+        try:
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir)
+                app.logger.debug(f"[OCR]Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            app.logger.warning(f"[OCR]Could not clean up temporary files: {str(e)}")
+
+
 @app.route('/edit_pdf', methods=['POST'])
 def edit_pdf_route():
     """Process a single PDF file with reordering, deletion, and rotation edits"""
@@ -697,6 +809,210 @@ def edit_pdf_route():
                 app.logger.debug(f"[PE]Cleaned up temporary directory: {temp_dir}")
         except Exception as e:
             app.logger.warning(f"[PE]Could not clean up temporary files: {str(e)}")
+
+
+@app.route('/version_compare')
+def version_compare():
+    """Display the PDF version comparison tool interface"""
+    return render_template('version_compare_tool.html')
+
+
+@app.route('/compare_pdfs_route', methods=['POST'])
+def compare_pdfs_route():
+    """Process two PDF files and generate comparison report"""
+    session_id = str(uuid.uuid4())[:8]
+    temp_dir = None
+    base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
+
+    try:
+        # Validate file uploads
+        if 'pdf_file_1' not in request.files or 'pdf_file_2' not in request.files:
+            return jsonify({"status": "error", "message": "Two PDF files are required"}), 400
+
+        pdf_file_1 = request.files['pdf_file_1']
+        pdf_file_2 = request.files['pdf_file_2']
+
+        if pdf_file_1.filename == '' or pdf_file_2.filename == '':
+            return jsonify({"status": "error", "message": "Both files must be selected"}), 400
+
+        if not (pdf_file_1.filename.lower().endswith('.pdf') and pdf_file_2.filename.lower().endswith('.pdf')):
+            return jsonify({"status": "error", "message": "Both files must be PDFs"}), 400
+
+        # Create temporary directory
+        temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        app.logger.debug(f"[VC]Created temp directory: {temp_dir}")
+
+        # Set up logging
+        logs_path = os.path.join(logs_dir, f'version_compare_{session_id}.log')
+        session_file_handler = RotatingFileHandler(
+            logs_path, maxBytes=100*1024*1024, backupCount=3, encoding='utf-8'
+        )
+        session_file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s-%(levelname)s-[VC]: %(message)s')
+        session_file_handler.setFormatter(formatter)
+        app.logger.addHandler(session_file_handler)
+
+        # Save uploaded PDFs
+        pdf1_path = os.path.join(temp_dir, secure_filename(pdf_file_1.filename))
+        pdf2_path = os.path.join(temp_dir, secure_filename(pdf_file_2.filename))
+
+        pdf_file_1.save(pdf1_path)
+        pdf_file_2.save(pdf2_path)
+
+        app.logger.info(f"[VC]Saved PDFs: {pdf_file_1.filename}, {pdf_file_2.filename}")
+
+        # Get comparison options
+        ignore_whitespace = request.form.get('ignore_whitespace') == 'on'
+
+        # Early exit check: if files are identical
+        import filecmp
+        if filecmp.cmp(pdf1_path, pdf2_path, shallow=False):
+            app.logger.info(f"[VC]Files are byte-for-byte identical")
+            return jsonify({
+                "status": "success",
+                "message": "The files are identical (byte-for-byte match). No differences found."
+            })
+
+        # Perform text comparison
+        app.logger.info(f"[VC]Starting text comparison (ignore_whitespace={ignore_whitespace})...")
+        text_results = buntool.compare_pdfs_text(pdf1_path, pdf2_path, ignore_whitespace)
+
+        # Perform structural comparison
+        app.logger.info(f"[VC]Starting structural comparison...")
+        structure_results = buntool.compare_pdfs_structure(pdf1_path, pdf2_path)
+
+        # Generate HTML report
+        report_filename = f'comparison_report_{session_id}.html'
+        report_path = os.path.join(temp_dir, report_filename)
+
+        app.logger.info(f"[VC]Generating HTML report...")
+        buntool.generate_comparison_html(text_results, structure_results, report_path)
+
+        if not os.path.exists(report_path):
+            return jsonify({"status": "error", "message": "Error generating comparison report"}), 500
+
+        app.logger.info(f"[VC]Report generated successfully. Sending to client...")
+
+        # Send HTML file to client
+        return send_file(
+            report_path,
+            as_attachment=True,
+            download_name=report_filename,
+            mimetype='text/html'
+        )
+
+    except Exception as e:
+        app.logger.error(f"[VC]Unexpected error in compare_pdfs_route: {str(e)}")
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+    finally:
+        # Clean up temporary files
+        try:
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir)
+                app.logger.debug(f"[VC]Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            app.logger.warning(f"[VC]Could not clean up temporary files: {str(e)}")
+
+
+@app.route('/metadata_cleaner')
+def metadata_cleaner():
+    """Display the PDF metadata cleaner tool interface"""
+    return render_template('metadata_cleaner_tool.html')
+
+
+@app.route('/clean_metadata_route', methods=['POST'])
+def clean_metadata_route():
+    """Process PDF file and remove privacy-sensitive metadata"""
+    session_id = str(uuid.uuid4())[:8]
+    temp_dir = None
+    base_dir = tempfile.gettempdir() if is_running_in_lambda() else '.'
+
+    try:
+        # Validate file upload
+        if 'pdf_file' not in request.files:
+            return jsonify({"status": "error", "message": "No PDF file provided"}), 400
+
+        pdf_file = request.files['pdf_file']
+
+        if pdf_file.filename == '':
+            return jsonify({"status": "error", "message": "No file selected"}), 400
+
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({"status": "error", "message": "File must be a PDF"}), 400
+
+        # Create temporary directory
+        temp_dir = os.path.join(base_dir, 'tempfiles', session_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        app.logger.debug(f"[MC]Created temp directory: {temp_dir}")
+
+        # Set up logging
+        logs_path = os.path.join(logs_dir, f'metadata_cleaner_{session_id}.log')
+        session_file_handler = RotatingFileHandler(
+            logs_path, maxBytes=100*1024*1024, backupCount=3, encoding='utf-8'
+        )
+        session_file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s-%(levelname)s-[MC]: %(message)s')
+        session_file_handler.setFormatter(formatter)
+        app.logger.addHandler(session_file_handler)
+
+        # Save uploaded PDF
+        input_pdf_path = os.path.join(temp_dir, secure_filename(pdf_file.filename))
+        pdf_file.save(input_pdf_path)
+
+        app.logger.info(f"[MC]Saved PDF: {pdf_file.filename}")
+
+        # Get cleaning options from form
+        options = {
+            'remove_metadata': request.form.get('remove_metadata') == 'on',
+            'remove_xmp': request.form.get('remove_xmp') == 'on',
+            'remove_annotations': request.form.get('remove_annotations') == 'on',
+            'remove_bookmarks': request.form.get('remove_bookmarks') == 'on',
+            'anonymize_dates': request.form.get('anonymize_dates') == 'on'
+        }
+
+        app.logger.info(f"[MC]Cleaning options: {options}")
+
+        # Generate output filename
+        original_name = os.path.splitext(secure_filename(pdf_file.filename))[0]
+        output_filename = f"{original_name}_cleaned.pdf"
+        output_pdf_path = os.path.join(temp_dir, output_filename)
+
+        # Clean metadata
+        app.logger.info(f"[MC]Starting metadata cleaning...")
+        result = buntool.clean_pdf_metadata(input_pdf_path, output_pdf_path, options)
+
+        if not result['success']:
+            return jsonify({"status": "error", "message": result['message']}), 500
+
+        if not os.path.exists(output_pdf_path):
+            return jsonify({"status": "error", "message": "Error generating cleaned PDF"}), 500
+
+        app.logger.info(f"[MC]Metadata cleaned successfully: {result['message']}")
+
+        # Send cleaned PDF to client
+        return send_file(
+            output_pdf_path,
+            as_attachment=True,
+            download_name=output_filename,
+            mimetype='application/pdf'
+        )
+
+    except Exception as e:
+        app.logger.error(f"[MC]Unexpected error in clean_metadata_route: {str(e)}")
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+    finally:
+        # Clean up temporary files
+        try:
+            if temp_dir and os.path.exists(temp_dir):
+                import shutil
+                shutil.rmtree(temp_dir)
+                app.logger.debug(f"[MC]Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            app.logger.warning(f"[MC]Could not clean up temporary files: {str(e)}")
 
 
 @app.route('/create_bundle', methods=['GET', 'POST'])

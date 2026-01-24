@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     # PDF tools
     pdftk-java \
     ghostscript \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-fra \
+    tesseract-ocr-deu \
     # LaTeX for page number generation
     texlive-latex-base \
     texlive-latex-extra \
